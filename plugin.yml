@@ -11,6 +11,15 @@ permissions:
   cristreecapitator.*:
     description: Gives access to all Cristichi's Tree Capitator commands
     children:
-      cristreecapitator.admin: op
+      cristreecapitator.admin: true
       cristreecapitator.use: true
-      cristreecapitator.vip: false
+      cristreecapitator.vip: true
+  cristreecapitator.admin:
+    description: Allows you to change config values and update
+    default: op
+  cristreecapitator.use:
+    description: Allows you to cut down trees at once
+    default: true
+  cristreecapitator.vip:
+    description: Allows you to cut down trees at once when VIP MODE is enabled
+    default: false
