@@ -2,6 +2,7 @@ name: CrisTreeCapitator
 main: main.TreeCapitator
 version: ALPHA
 commands:
-  tc:
-    description: Comando clave
-    usage: "/tc help"
+  treecapitator:
+   description: Set yourself on fire.
+   aliases: [tc, treecap]
+   usage: /tc help
