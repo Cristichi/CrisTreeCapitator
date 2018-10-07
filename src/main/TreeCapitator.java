@@ -22,6 +22,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	// Ajustes
 	private int maxBlocks = 1500;
+	private boolean vipMode = false;
 
 	// Updater
 	private static final int ID = 294976;
@@ -58,14 +59,15 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private void onBlockBreak(BlockBreakEvent e) {
 		Block primero = e.getBlock();
 		Material tipo = primero.getBlockData().getMaterial();
-
-		int destr = breakRec(primero, tipo, 0);
-
-		e.getPlayer().sendMessage(header + "You destroyed " + destr + " blocks of " + tipo.name() + ".");
+		
+		if (tipo.name().contains("LOG") || tipo.name().contains("LEAVES")) {
+			int destr = breakRec(primero, tipo, 0);
+			e.getPlayer().sendMessage(header + "You destroyed " + destr + " blocks of " + tipo.name() + ".");
+		}
 	}
 
 	private int breakRec(Block lego, Material type, int destroyed) {
-		if (!(type.name().contains("LOG") || type.name().contains("LEAVES")) && lego.getBlockData().getMaterial() != type) {
+		if (!lego.getBlockData().getMaterial().equals(type)) {
 			return destroyed;
 		}
 

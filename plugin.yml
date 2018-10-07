@@ -2,7 +2,15 @@ name: CrisTreeCapitator
 main: main.TreeCapitator
 version: ALPHA
 commands:
-  treecapitator:
-   description: Set yourself on fire.
-   aliases: [tc, treecap]
-   usage: /tc help
+  tc:
+   description: Control CrisTreeCapitator and extra info.
+   aliases: [treecapitator, treecap]
+   usage: /tc help 
+   
+permissions:
+  cristreecapitator.*:
+    description: Gives access to all Cristichi's Tree Capitator commands
+    children:
+      cristreecapitator.admin: op
+      cristreecapitator.use: true
+      cristreecapitator.vip: false
