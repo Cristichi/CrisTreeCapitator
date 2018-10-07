@@ -65,8 +65,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	}
 
 	private int breakRec(Block lego, Material type, int destroyed) {
-		Material tipo = lego.getBlockData().getMaterial();
-		if (tipo != type) {
+		if (!(type.name().contains("LOG") || type.name().contains("LEAVES")) && lego.getBlockData().getMaterial() != type) {
 			return destroyed;
 		}
 
