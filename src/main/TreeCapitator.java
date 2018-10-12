@@ -26,24 +26,30 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	// Updater
 	private static final int ID = 294976;
+	private static Updater updater;
 	public static boolean update = false;
 	public static String name = "";
 	public static ReleaseType type = null;
 	public static String version = "";
 	public static String link = "";
-
-	@Override
-	public void onEnable() {
-		getServer().getPluginManager().registerEvents(this, this);
-
-		Updater updater = new Updater(this, ID, this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false);
+	
+	private boolean checkUpdate() {
+		updater = new Updater(this, ID, this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false);
 		update = updater.getResult() == Updater.UpdateResult.UPDATE_AVAILABLE;
 		name = updater.getLatestName();
 		version = updater.getLatestGameVersion();
 		type = updater.getLatestType();
 		link = updater.getLatestFileLink();
 
-		if (update) {
+		return update;
+		
+	}
+
+	@Override
+	public void onEnable() {
+		getServer().getPluginManager().registerEvents(this, this);
+
+		if (checkUpdate()) {
 			getLogger().info("An update is available, use /tc update to update to the lastest version");
 		}
 
@@ -108,6 +114,11 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				case "update":
 					if (sender.hasPermission("cristreecapitator.admin")) {
 						sinPermiso = false;
+					}
+					if (checkUpdate()) {
+						updater = new Updater(this, ID, this.getFile(), Updater.UpdateType.DEFAULT, true);
+					}else {
+						sender.sendMessage(header+"This plugin is already up to date.");
 					}
 					break;
 
