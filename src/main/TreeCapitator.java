@@ -18,10 +18,13 @@ import updater.Updater.ReleaseType;
 public class TreeCapitator extends JavaPlugin implements Listener {
 	private PluginDescriptionFile desc = getDescription();
 
-	private final String header = ChatColor.BLUE + "[" + desc.getName() + "] " + ChatColor.AQUA;
+	private final ChatColor mainColor = ChatColor.BLUE;
+	private final ChatColor textColor = ChatColor.AQUA;
+	private final ChatColor accentColor = ChatColor.DARK_AQUA;
+	private final String header = mainColor + "[" + desc.getName() + "] " + textColor;
 
 	// Ajustes
-	private int maxBlocks = 1500;
+	private int maxBlocks = -1;
 	private boolean vipMode = false;
 
 	// Updater
@@ -32,7 +35,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	public static ReleaseType type = null;
 	public static String version = "";
 	public static String link = "";
-	
+
 	private boolean checkUpdate() {
 		updater = new Updater(this, ID, this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false);
 		update = updater.getResult() == Updater.UpdateResult.UPDATE_AVAILABLE;
@@ -42,7 +45,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		link = updater.getLatestFileLink();
 
 		return update;
-		
+
 	}
 
 	@Override
@@ -50,7 +53,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(this, this);
 
 		if (checkUpdate()) {
-			getLogger().info("An update is available, use /tc update to update to the lastest version");
+			getServer().getConsoleSender().sendMessage(header + ChatColor.GREEN
+					+ "An update is available, use /tc update to update to the lastest version");
 		}
 
 		getLogger().info("Enabled");
@@ -76,23 +80,40 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private int breakRec(Block lego, Material type, int destroyed) {
 		Material tipo = lego.getBlockData().getMaterial();
 		if (tipo.name().contains("LOG") || tipo.name().contains("LEAVES")) {
-			lego.breakNaturally();
-			if (++destroyed >= maxBlocks && maxBlocks > 0) {
+			if (destroyed >= maxBlocks && maxBlocks > 0) {
 				return destroyed;
 			}
+			lego.breakNaturally();
+			destroyed++;
 
 			World mundo = lego.getWorld();
 			int x = lego.getX(), y = lego.getY(), z = lego.getZ();
 
-			destroyed = breakRec(mundo.getBlockAt(x + 1, y, z), type, destroyed);
-			destroyed = breakRec(mundo.getBlockAt(x, y + 1, z), type, destroyed);
-			destroyed = breakRec(mundo.getBlockAt(x, y, z + 1), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRec(mundo.getBlockAt(x + 1, y, z), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRec(mundo.getBlockAt(x, y + 1, z), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRec(mundo.getBlockAt(x, y, z + 1), type, destroyed);
 
-			destroyed = breakRec(mundo.getBlockAt(x - 1, y, z), type, destroyed);
-			destroyed = breakRec(mundo.getBlockAt(x, y - 1, z), type, destroyed);
-			destroyed = breakRec(mundo.getBlockAt(x, y, z - 1), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				//destroyed = breakRec(mundo.getBlockAt(x - 1, y, z), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRec(mundo.getBlockAt(x, y - 1, z), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				//destroyed = breakRec(mundo.getBlockAt(x, y, z - 1), type, destroyed);
+
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRec(mundo.getBlockAt(x + 1, y, z + 1), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRec(mundo.getBlockAt(x + 1, y, z - 1), type, destroyed);
+
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRec(mundo.getBlockAt(x - 1, y, z + 1), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRec(mundo.getBlockAt(x - 1, y, z - 1), type, destroyed);
 		}
-		
+
 		return destroyed;
 	}
 
@@ -107,19 +128,25 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			}
 		}
 
-		boolean sinPermiso = true;
+		boolean sinPermiso = false;
 		if (bueno) {
 			if (args.length > 0) {
 				switch (args[0]) {
 				case "update":
 					if (sender.hasPermission("cristreecapitator.admin")) {
-						sinPermiso = false;
+						if (checkUpdate()) {
+							sender.sendMessage(header + "Updating CrisTreeCapitator...");
+							updater = new Updater(this, ID, this.getFile(), Updater.UpdateType.DEFAULT, true);
+							updater.getResult();
+							sender.sendMessage(
+									header + "Use " + accentColor + "/restart" + textColor + " to apply changes.");
+						} else {
+							sender.sendMessage(header + "This plugin is already up to date.");
+						}
+					} else {
+						sinPermiso = true;
 					}
-					if (checkUpdate()) {
-						updater = new Updater(this, ID, this.getFile(), Updater.UpdateType.DEFAULT, true);
-					}else {
-						sender.sendMessage(header+"This plugin is already up to date.");
-					}
+
 					break;
 
 				default:
