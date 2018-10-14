@@ -592,6 +592,7 @@ public class Updater {
             if (title.split(DELIMETER).length >= 2) {
                 // Get the newest file's version number
                 final String remoteVersion = title.split(DELIMETER)[title.split(DELIMETER).length - 1].split(" ")[0];
+                this.remoteVersion = remoteVersion;
 
                 if (this.hasTag(localVersion) || !this.shouldUpdate(localVersion, remoteVersion)) {
                     // We already have the latest version, or this build is tagged for no-update
@@ -639,6 +640,20 @@ public class Updater {
      * @return true if Updater should consider the remote version an update, false if not.
      */
     public boolean shouldUpdate(String localVersion, String remoteVersion) {
+    	/*
+    	try{
+    		double mcCurrent = Double.parseDouble(localVersion.substring(localVersion.indexOf("MC")+2));
+    		double vCurrent = Double.parseDouble(localVersion.substring(localVersion.indexOf("v")+1, localVersion.indexOf("MC")));
+    		double mcNew = Double.parseDouble(remoteVersion.substring(remoteVersion.indexOf("MC")+2));
+    		double vNew = Double.parseDouble(remoteVersion.substring(remoteVersion.indexOf("v")+1, localVersion.indexOf("MC")));
+
+    		if (mcCurrent<=mcNew && vCurrent < vNew) {
+    			return true;
+    		}
+    		return false;
+    	}catch (NumberFormatException e) {
+    	}
+    	*/
         return !localVersion.equalsIgnoreCase(remoteVersion);
     }
 
@@ -776,4 +791,12 @@ public class Updater {
     private void runCallback() {
         this.callback.onFinish(this);
     }
+    
+    private String remoteVersion;
+    public String getRemoteVersion() {
+    	if (remoteVersion==null) {
+    		throw new NullPointerException("Version has not been checked yet");
+    	}
+    	return remoteVersion;
+	}
 }

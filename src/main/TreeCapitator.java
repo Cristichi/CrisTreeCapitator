@@ -13,7 +13,6 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import updater.Updater;
-import updater.Updater.ReleaseType;
 
 public class TreeCapitator extends JavaPlugin implements Listener {
 	private PluginDescriptionFile desc = getDescription();
@@ -31,18 +30,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private static final int ID = 294976;
 	private static Updater updater;
 	public static boolean update = false;
-	public static String name = "";
-	public static ReleaseType type = null;
-	public static String version = "";
-	public static String link = "";
 
 	private boolean checkUpdate() {
 		updater = new Updater(this, ID, this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false);
 		update = updater.getResult() == Updater.UpdateResult.UPDATE_AVAILABLE;
-		name = updater.getLatestName();
-		version = updater.getLatestGameVersion();
-		type = updater.getLatestType();
-		link = updater.getLatestFileLink();
 
 		return update;
 
@@ -53,8 +44,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(this, this);
 
 		if (checkUpdate()) {
-			getServer().getConsoleSender().sendMessage(header + ChatColor.GREEN
-					+ "An update is available, use /tc update to update to the lastest version");
+			getServer().getConsoleSender()
+			.sendMessage(header + ChatColor.GREEN
+					+ "An update is available, use /tc update to update to the lastest version (from v"
+					+ desc.getVersion() + " to v" + updater.getRemoteVersion() + ")");
 		}
 
 		getLogger().info("Enabled");
@@ -71,51 +64,135 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		Material tipo = primero.getBlockData().getMaterial();
 
 		if ((vipMode && e.getPlayer().hasPermission("cristreecapitator.vip") || !vipMode)
-				&& (tipo.name().contains("LOG") || tipo.name().contains("LEAVES"))) {
-			int destr = breakRec(primero, tipo, 0);
-			e.getPlayer().sendMessage(header + "You destroyed " + destr + " blocks.");
+				&& (tipo.name().contains("LOG") /*|| tipo.name().contains("LEAVES")*/)) {
+
+			try {
+				int destr = breakRec(primero, tipo, 0);
+				e.getPlayer().sendMessage(header+"Destroyed "+destr+".");
+			} catch (StackOverflowError e1) {
+			}
 		}
 	}
+
 
 	private int breakRec(Block lego, Material type, int destroyed) {
 		Material tipo = lego.getBlockData().getMaterial();
 		if (tipo.name().contains("LOG") || tipo.name().contains("LEAVES")) {
-			if (destroyed >= maxBlocks && maxBlocks > 0) {
+			if (destroyed > maxBlocks && maxBlocks > 0) {
 				return destroyed;
 			}
-			lego.breakNaturally();
-			destroyed++;
-
 			World mundo = lego.getWorld();
+			if (lego.breakNaturally()) {
+				mundo.strikeLightningEffect(lego.getLocation());
+				/*
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}*/
+				destroyed++;
+			}else
+				return destroyed;
+
 			int x = lego.getX(), y = lego.getY(), z = lego.getZ();
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRec(mundo.getBlockAt(x + 1, y, z), type, destroyed);
-			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRec(mundo.getBlockAt(x, y + 1, z), type, destroyed);
-			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRec(mundo.getBlockAt(x, y, z + 1), type, destroyed);
-
-			if (destroyed < maxBlocks || maxBlocks < 0)
-				//destroyed = breakRec(mundo.getBlockAt(x - 1, y, z), type, destroyed);
-			if (destroyed < maxBlocks || maxBlocks < 0)
 				destroyed = breakRec(mundo.getBlockAt(x, y - 1, z), type, destroyed);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				//destroyed = breakRec(mundo.getBlockAt(x, y, z - 1), type, destroyed);
+				destroyed = breakRec(mundo.getBlockAt(x, y + 1, z), type, destroyed);
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
 				destroyed = breakRec(mundo.getBlockAt(x + 1, y, z + 1), type, destroyed);
 			if (destroyed < maxBlocks || maxBlocks < 0)
 				destroyed = breakRec(mundo.getBlockAt(x + 1, y, z - 1), type, destroyed);
-
 			if (destroyed < maxBlocks || maxBlocks < 0)
 				destroyed = breakRec(mundo.getBlockAt(x - 1, y, z + 1), type, destroyed);
 			if (destroyed < maxBlocks || maxBlocks < 0)
 				destroyed = breakRec(mundo.getBlockAt(x - 1, y, z - 1), type, destroyed);
+
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRec(mundo.getBlockAt(x + 1, y, z), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRec(mundo.getBlockAt(x, y, z + 1), type, destroyed);
+
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRec(mundo.getBlockAt(x - 1, y, z), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRec(mundo.getBlockAt(x, y, z - 1), type, destroyed);
 		}
 
 		return destroyed;
 	}
+
+	/*
+	private int breakRecUp(Block lego, Material type, int destroyed) {
+		Material tipo = lego.getBlockData().getMaterial();
+		if (tipo.name().contains("LOG") || tipo.name().contains("LEAVES")) {
+			if (destroyed >= maxBlocks/2 && maxBlocks > 0) {
+				return destroyed;
+			}
+			if (lego.breakNaturally())
+				destroyed++;
+
+			World mundo = lego.getWorld();
+			int x = lego.getX(), y = lego.getY(), z = lego.getZ();
+
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRecUp(mundo.getBlockAt(x, y + 1, z), type, destroyed);
+
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRecUp(mundo.getBlockAt(x + 1, y, z), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRecUp(mundo.getBlockAt(x, y, z + 1), type, destroyed);
+
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRecUp(mundo.getBlockAt(x + 1, y, z + 1), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRecUp(mundo.getBlockAt(x + 1, y, z - 1), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRecUp(mundo.getBlockAt(x - 1, y, z + 1), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRecUp(mundo.getBlockAt(x - 1, y, z - 1), type, destroyed);
+		}
+
+		return destroyed;
+	}
+	private int breakRecDown(Block lego, Material type, int destroyed) {
+		Material tipo = lego.getBlockData().getMaterial();
+		if (tipo.name().contains("LOG") || tipo.name().contains("LEAVES")) {
+			if (destroyed >= maxBlocks && maxBlocks > 0) {
+				return destroyed;
+			}
+			if (lego.breakNaturally())
+				destroyed++;
+
+			World mundo = lego.getWorld();
+			int x = lego.getX(), y = lego.getY(), z = lego.getZ();
+
+
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRecDown(mundo.getBlockAt(x, y - 1, z), type, destroyed);
+
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRecDown(mundo.getBlockAt(x - 1, y, z), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRecDown(mundo.getBlockAt(x, y, z - 1), type, destroyed);
+
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRecDown(mundo.getBlockAt(x + 1, y, z + 1), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRecDown(mundo.getBlockAt(x + 1, y, z - 1), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRecDown(mundo.getBlockAt(x - 1, y, z + 1), type, destroyed);
+			if (destroyed < maxBlocks || maxBlocks < 0)
+				destroyed = breakRecDown(mundo.getBlockAt(x - 1, y, z - 1), type, destroyed);
+		}
+
+		return destroyed;
+	}
+	 */
+
+
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
