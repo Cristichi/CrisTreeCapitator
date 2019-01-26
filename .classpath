@@ -6,10 +6,6 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/crist/eclipse-workspace/Libs/craftbukkit-1.13.1.jar">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="lib/craftbukkit-1.13.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

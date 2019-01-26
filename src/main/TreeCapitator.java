@@ -23,7 +23,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private final String header = mainColor + "[" + desc.getName() + "] " + textColor;
 
 	// Ajustes
-	private int maxBlocks = -1;
+	private int maxBlocks = 2;
 	private boolean vipMode = false;
 
 	// Updater
@@ -83,7 +83,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			}
 			World mundo = lego.getWorld();
 			if (lego.breakNaturally()) {
-				mundo.strikeLightningEffect(lego.getLocation());
+				//mundo.strikeLightningEffect(lego.getLocation());
 				/*
 				try {
 					Thread.sleep(10);
@@ -209,7 +209,19 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		if (bueno) {
 			if (args.length > 0) {
 				switch (args[0]) {
-				case "update":
+					
+				case "help":
+					sender.sendMessage(header+"Commands:\n"
+							+ ChatColor.GOLD+"help:"+ChatColor.RESET+" Shows this help message.\n"
+							+ ChatColor.GOLD+"update:"+ChatColor.RESET+" Updates the plugin if there is a new version.\n"
+							+ ChatColor.GOLD+"setlimit <number>:"+ChatColor.RESET+" Sets the block limit to break each time. Negative number for unlimited."
+							);
+
+					break;
+
+				case "limit":
+				case "setlimit":
+				case "blocklimit":
 					if (sender.hasPermission("cristreecapitator.admin")) {
 						if (checkUpdate()) {
 							sender.sendMessage(header + "Updating CrisTreeCapitator...");
@@ -226,7 +238,25 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 					break;
 
+				case "update":
+					if (sender.hasPermission("cristreecapitator.admin")) {
+						if (checkUpdate()) {
+							sender.sendMessage(header + "Updating CrisTreeCapitator...");
+							updater = new Updater(this, ID, this.getFile(), Updater.UpdateType.DEFAULT, true);
+							updater.getResult();
+							sender.sendMessage(
+									header + "Use " + accentColor + "/restart" + textColor + " to apply changes.");
+						} else {
+							sender.sendMessage(header + "This plugin is already up to date.");
+						}
+					} else {
+						sinPermiso = true;
+					}
+
+					break;
+					
 				default:
+					sender.sendMessage(header + "Command not found, please check \"/"+command+" help\".");
 					break;
 				}
 			} else {
