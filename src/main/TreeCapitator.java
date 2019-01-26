@@ -45,9 +45,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 		if (checkUpdate()) {
 			getServer().getConsoleSender()
-			.sendMessage(header + ChatColor.GREEN
-					+ "An update is available, use /tc update to update to the lastest version (from v"
-					+ desc.getVersion() + " to v" + updater.getRemoteVersion() + ")");
+					.sendMessage(header + ChatColor.GREEN
+							+ "An update is available, use /tc update to update to the lastest version (from v"
+							+ desc.getVersion() + " to v" + updater.getRemoteVersion() + ")");
 		}
 
 		getLogger().info("Enabled");
@@ -64,16 +64,15 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		Material tipo = primero.getBlockData().getMaterial();
 
 		if ((vipMode && e.getPlayer().hasPermission("cristreecapitator.vip") || !vipMode)
-				&& (tipo.name().contains("LOG") /*|| tipo.name().contains("LEAVES")*/)) {
+				&& (tipo.name().contains("LOG") /* || tipo.name().contains("LEAVES") */)) {
 
 			try {
 				int destr = breakRec(primero, tipo, 0);
-				e.getPlayer().sendMessage(header+"Destroyed "+destr+".");
+				e.getPlayer().sendMessage(header + "Destroyed " + destr + ".");
 			} catch (StackOverflowError e1) {
 			}
 		}
 	}
-
 
 	private int breakRec(Block lego, Material type, int destroyed) {
 		Material tipo = lego.getBlockData().getMaterial();
@@ -83,15 +82,13 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			}
 			World mundo = lego.getWorld();
 			if (lego.breakNaturally()) {
-				//mundo.strikeLightningEffect(lego.getLocation());
+				// mundo.strikeLightningEffect(lego.getLocation());
 				/*
-				try {
-					Thread.sleep(10);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}*/
+				 * try { Thread.sleep(10); } catch (InterruptedException e) {
+				 * e.printStackTrace(); }
+				 */
 				destroyed++;
-			}else
+			} else
 				return destroyed;
 
 			int x = lego.getX(), y = lego.getY(), z = lego.getZ();
@@ -125,74 +122,59 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	}
 
 	/*
-	private int breakRecUp(Block lego, Material type, int destroyed) {
-		Material tipo = lego.getBlockData().getMaterial();
-		if (tipo.name().contains("LOG") || tipo.name().contains("LEAVES")) {
-			if (destroyed >= maxBlocks/2 && maxBlocks > 0) {
-				return destroyed;
-			}
-			if (lego.breakNaturally())
-				destroyed++;
-
-			World mundo = lego.getWorld();
-			int x = lego.getX(), y = lego.getY(), z = lego.getZ();
-
-			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecUp(mundo.getBlockAt(x, y + 1, z), type, destroyed);
-
-			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecUp(mundo.getBlockAt(x + 1, y, z), type, destroyed);
-			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecUp(mundo.getBlockAt(x, y, z + 1), type, destroyed);
-
-			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecUp(mundo.getBlockAt(x + 1, y, z + 1), type, destroyed);
-			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecUp(mundo.getBlockAt(x + 1, y, z - 1), type, destroyed);
-			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecUp(mundo.getBlockAt(x - 1, y, z + 1), type, destroyed);
-			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecUp(mundo.getBlockAt(x - 1, y, z - 1), type, destroyed);
-		}
-
-		return destroyed;
-	}
-	private int breakRecDown(Block lego, Material type, int destroyed) {
-		Material tipo = lego.getBlockData().getMaterial();
-		if (tipo.name().contains("LOG") || tipo.name().contains("LEAVES")) {
-			if (destroyed >= maxBlocks && maxBlocks > 0) {
-				return destroyed;
-			}
-			if (lego.breakNaturally())
-				destroyed++;
-
-			World mundo = lego.getWorld();
-			int x = lego.getX(), y = lego.getY(), z = lego.getZ();
-
-
-			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecDown(mundo.getBlockAt(x, y - 1, z), type, destroyed);
-
-			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecDown(mundo.getBlockAt(x - 1, y, z), type, destroyed);
-			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecDown(mundo.getBlockAt(x, y, z - 1), type, destroyed);
-
-			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecDown(mundo.getBlockAt(x + 1, y, z + 1), type, destroyed);
-			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecDown(mundo.getBlockAt(x + 1, y, z - 1), type, destroyed);
-			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecDown(mundo.getBlockAt(x - 1, y, z + 1), type, destroyed);
-			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecDown(mundo.getBlockAt(x - 1, y, z - 1), type, destroyed);
-		}
-
-		return destroyed;
-	}
+	 * private int breakRecUp(Block lego, Material type, int destroyed) { Material
+	 * tipo = lego.getBlockData().getMaterial(); if (tipo.name().contains("LOG") ||
+	 * tipo.name().contains("LEAVES")) { if (destroyed >= maxBlocks/2 && maxBlocks >
+	 * 0) { return destroyed; } if (lego.breakNaturally()) destroyed++;
+	 * 
+	 * World mundo = lego.getWorld(); int x = lego.getX(), y = lego.getY(), z =
+	 * lego.getZ();
+	 * 
+	 * if (destroyed < maxBlocks || maxBlocks < 0) destroyed =
+	 * breakRecUp(mundo.getBlockAt(x, y + 1, z), type, destroyed);
+	 * 
+	 * if (destroyed < maxBlocks || maxBlocks < 0) destroyed =
+	 * breakRecUp(mundo.getBlockAt(x + 1, y, z), type, destroyed); if (destroyed <
+	 * maxBlocks || maxBlocks < 0) destroyed = breakRecUp(mundo.getBlockAt(x, y, z +
+	 * 1), type, destroyed);
+	 * 
+	 * if (destroyed < maxBlocks || maxBlocks < 0) destroyed =
+	 * breakRecUp(mundo.getBlockAt(x + 1, y, z + 1), type, destroyed); if (destroyed
+	 * < maxBlocks || maxBlocks < 0) destroyed = breakRecUp(mundo.getBlockAt(x + 1,
+	 * y, z - 1), type, destroyed); if (destroyed < maxBlocks || maxBlocks < 0)
+	 * destroyed = breakRecUp(mundo.getBlockAt(x - 1, y, z + 1), type, destroyed);
+	 * if (destroyed < maxBlocks || maxBlocks < 0) destroyed =
+	 * breakRecUp(mundo.getBlockAt(x - 1, y, z - 1), type, destroyed); }
+	 * 
+	 * return destroyed; } private int breakRecDown(Block lego, Material type, int
+	 * destroyed) { Material tipo = lego.getBlockData().getMaterial(); if
+	 * (tipo.name().contains("LOG") || tipo.name().contains("LEAVES")) { if
+	 * (destroyed >= maxBlocks && maxBlocks > 0) { return destroyed; } if
+	 * (lego.breakNaturally()) destroyed++;
+	 * 
+	 * World mundo = lego.getWorld(); int x = lego.getX(), y = lego.getY(), z =
+	 * lego.getZ();
+	 * 
+	 * 
+	 * if (destroyed < maxBlocks || maxBlocks < 0) destroyed =
+	 * breakRecDown(mundo.getBlockAt(x, y - 1, z), type, destroyed);
+	 * 
+	 * if (destroyed < maxBlocks || maxBlocks < 0) destroyed =
+	 * breakRecDown(mundo.getBlockAt(x - 1, y, z), type, destroyed); if (destroyed <
+	 * maxBlocks || maxBlocks < 0) destroyed = breakRecDown(mundo.getBlockAt(x, y, z
+	 * - 1), type, destroyed);
+	 * 
+	 * if (destroyed < maxBlocks || maxBlocks < 0) destroyed =
+	 * breakRecDown(mundo.getBlockAt(x + 1, y, z + 1), type, destroyed); if
+	 * (destroyed < maxBlocks || maxBlocks < 0) destroyed =
+	 * breakRecDown(mundo.getBlockAt(x + 1, y, z - 1), type, destroyed); if
+	 * (destroyed < maxBlocks || maxBlocks < 0) destroyed =
+	 * breakRecDown(mundo.getBlockAt(x - 1, y, z + 1), type, destroyed); if
+	 * (destroyed < maxBlocks || maxBlocks < 0) destroyed =
+	 * breakRecDown(mundo.getBlockAt(x - 1, y, z - 1), type, destroyed); }
+	 * 
+	 * return destroyed; }
 	 */
-
-
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -209,13 +191,13 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		if (bueno) {
 			if (args.length > 0) {
 				switch (args[0]) {
-					
+
 				case "help":
-					sender.sendMessage(header+"Commands:\n"
-							+ ChatColor.GOLD+"help:"+ChatColor.RESET+" Shows this help message.\n"
-							+ ChatColor.GOLD+"update:"+ChatColor.RESET+" Updates the plugin if there is a new version.\n"
-							+ ChatColor.GOLD+"setlimit <number>:"+ChatColor.RESET+" Sets the block limit to break each time. Negative number for unlimited."
-							);
+					sender.sendMessage(header + "Commands:\n" + accentColor + "/" + label + " help:" + textColor
+							+ " Shows this help message.\n" + accentColor + "/" + label + " update:" + textColor
+							+ " Updates the plugin if there is a new version.\n" + accentColor + "/" + label
+							+ " setlimit <number>:" + textColor
+							+ " Sets the block limit to break each time. Negative number for unlimited.");
 
 					break;
 
@@ -223,14 +205,51 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				case "setlimit":
 				case "blocklimit":
 					if (sender.hasPermission("cristreecapitator.admin")) {
-						if (checkUpdate()) {
-							sender.sendMessage(header + "Updating CrisTreeCapitator...");
-							updater = new Updater(this, ID, this.getFile(), Updater.UpdateType.DEFAULT, true);
-							updater.getResult();
-							sender.sendMessage(
-									header + "Use " + accentColor + "/restart" + textColor + " to apply changes.");
+						if (args.length != 2) {
+							sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+									+ " <number>" + textColor + ".");
 						} else {
-							sender.sendMessage(header + "This plugin is already up to date.");
+							try {
+								int nuevoMax = Integer.parseInt(args[1]);
+								maxBlocks = nuevoMax < 0 ? -1 : nuevoMax;
+								sender.sendMessage(
+										header + "Limit set to " + (nuevoMax < 0 ? "unbounded" : nuevoMax) + ".");
+							} catch (NumberFormatException e) {
+								sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+										+ " <number>" + textColor + ". (" + accentColor + args[1] + textColor
+										+ " is not a valid number)");
+							}
+						}
+					} else {
+						sinPermiso = true;
+					}
+
+					break;
+
+				case "setvipmode":
+				case "vipmode":
+				case "vipneeded":
+					if (sender.hasPermission("cristreecapitator.admin")) {
+						if (args.length != 2) {
+							sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+									+ " <true/false/yes/no>" + textColor + ".");
+						} else {
+							switch (args[1]) {
+							case "true":
+							case "yes":
+								vipMode = true;
+								break;
+							case "false":
+							case "no":
+								vipMode = false;
+								break;
+
+							default:
+								sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+										+ " <true/false/yes/no>" + textColor + ". (" + accentColor + args[1] + textColor
+										+ " is not a valid argument)");
+								break;
+							}
 						}
 					} else {
 						sinPermiso = true;
@@ -254,9 +273,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					}
 
 					break;
-					
+
 				default:
-					sender.sendMessage(header + "Command not found, please check \"/"+command+" help\".");
+					sender.sendMessage(header + "Command not found, please check \"/" + command + " help\".");
 					break;
 				}
 			} else {
@@ -265,7 +284,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		}
 
 		if (sinPermiso) {
-			sender.sendMessage(header + ChatColor.RED + "You don't have permission to use this.");
+			sender.sendMessage(header + ChatColor.RED + "You don't have permission to use this command.");
 		}
 		return bueno;
 	}
