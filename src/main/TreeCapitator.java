@@ -1,5 +1,7 @@
 package main;
 
+import java.io.IOException;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -12,6 +14,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import objs.Configuration;
 import updater.Updater;
 
 public class TreeCapitator extends JavaPlugin implements Listener {
@@ -23,8 +26,13 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private final String header = mainColor + "[" + desc.getName() + "] " + textColor;
 
 	// Ajustes
+	private Configuration config;
+	private static final String STRG_MAX_BLOCKS = "destroy limit";
 	private int maxBlocks = 2;
+	private static final String STRG_VIP_MODE = "vip mode";
 	private boolean vipMode = false;
+	private static final String STRG_REPLANT = "replant";
+	private boolean replant = true;
 
 	// Updater
 	private static final int ID = 294976;
@@ -36,7 +44,6 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		update = updater.getResult() == Updater.UpdateResult.UPDATE_AVAILABLE;
 
 		return update;
-
 	}
 
 	@Override
@@ -50,11 +57,37 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							+ desc.getVersion() + " to v" + updater.getRemoteVersion() + ")");
 		}
 
+		config = new Configuration("CrisTreeCapitator/config.yml");
+		saveConfiguration();
+		loadConfiguration();
 		getLogger().info("Enabled");
+	}
+
+	private void loadConfiguration() {
+		maxBlocks = config.getInt(STRG_MAX_BLOCKS, maxBlocks);
+		vipMode = config.getBoolean(STRG_VIP_MODE, vipMode);
+		replant = config.getBoolean(STRG_REPLANT, replant);
+		try {
+			config.reloadConfig();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void saveConfiguration() {
+		config.setValue(STRG_MAX_BLOCKS, maxBlocks);
+		config.setValue(STRG_VIP_MODE, vipMode);
+		config.setValue(STRG_REPLANT, replant);
+		try {
+			config.saveConfig();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void onDisable() {
+		saveConfiguration();
 		getLogger().info("Disabled");
 	}
 
@@ -121,60 +154,71 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		return destroyed;
 	}
 
-	/*
-	 * private int breakRecUp(Block lego, Material type, int destroyed) { Material
-	 * tipo = lego.getBlockData().getMaterial(); if (tipo.name().contains("LOG") ||
-	 * tipo.name().contains("LEAVES")) { if (destroyed >= maxBlocks/2 && maxBlocks >
-	 * 0) { return destroyed; } if (lego.breakNaturally()) destroyed++;
-	 * 
-	 * World mundo = lego.getWorld(); int x = lego.getX(), y = lego.getY(), z =
-	 * lego.getZ();
-	 * 
-	 * if (destroyed < maxBlocks || maxBlocks < 0) destroyed =
-	 * breakRecUp(mundo.getBlockAt(x, y + 1, z), type, destroyed);
-	 * 
-	 * if (destroyed < maxBlocks || maxBlocks < 0) destroyed =
-	 * breakRecUp(mundo.getBlockAt(x + 1, y, z), type, destroyed); if (destroyed <
-	 * maxBlocks || maxBlocks < 0) destroyed = breakRecUp(mundo.getBlockAt(x, y, z +
-	 * 1), type, destroyed);
-	 * 
-	 * if (destroyed < maxBlocks || maxBlocks < 0) destroyed =
-	 * breakRecUp(mundo.getBlockAt(x + 1, y, z + 1), type, destroyed); if (destroyed
-	 * < maxBlocks || maxBlocks < 0) destroyed = breakRecUp(mundo.getBlockAt(x + 1,
-	 * y, z - 1), type, destroyed); if (destroyed < maxBlocks || maxBlocks < 0)
-	 * destroyed = breakRecUp(mundo.getBlockAt(x - 1, y, z + 1), type, destroyed);
-	 * if (destroyed < maxBlocks || maxBlocks < 0) destroyed =
-	 * breakRecUp(mundo.getBlockAt(x - 1, y, z - 1), type, destroyed); }
-	 * 
-	 * return destroyed; } private int breakRecDown(Block lego, Material type, int
-	 * destroyed) { Material tipo = lego.getBlockData().getMaterial(); if
-	 * (tipo.name().contains("LOG") || tipo.name().contains("LEAVES")) { if
-	 * (destroyed >= maxBlocks && maxBlocks > 0) { return destroyed; } if
-	 * (lego.breakNaturally()) destroyed++;
-	 * 
-	 * World mundo = lego.getWorld(); int x = lego.getX(), y = lego.getY(), z =
-	 * lego.getZ();
-	 * 
-	 * 
-	 * if (destroyed < maxBlocks || maxBlocks < 0) destroyed =
-	 * breakRecDown(mundo.getBlockAt(x, y - 1, z), type, destroyed);
-	 * 
-	 * if (destroyed < maxBlocks || maxBlocks < 0) destroyed =
-	 * breakRecDown(mundo.getBlockAt(x - 1, y, z), type, destroyed); if (destroyed <
-	 * maxBlocks || maxBlocks < 0) destroyed = breakRecDown(mundo.getBlockAt(x, y, z
-	 * - 1), type, destroyed);
-	 * 
-	 * if (destroyed < maxBlocks || maxBlocks < 0) destroyed =
-	 * breakRecDown(mundo.getBlockAt(x + 1, y, z + 1), type, destroyed); if
-	 * (destroyed < maxBlocks || maxBlocks < 0) destroyed =
-	 * breakRecDown(mundo.getBlockAt(x + 1, y, z - 1), type, destroyed); if
-	 * (destroyed < maxBlocks || maxBlocks < 0) destroyed =
-	 * breakRecDown(mundo.getBlockAt(x - 1, y, z + 1), type, destroyed); if
-	 * (destroyed < maxBlocks || maxBlocks < 0) destroyed =
-	 * breakRecDown(mundo.getBlockAt(x - 1, y, z - 1), type, destroyed); }
-	 * 
-	 * return destroyed; }
-	 */
+//	private int breakRecUp(Block lego, Material type, int destroyed) {
+//		Material tipo = lego.getBlockData().getMaterial();
+//		if (tipo.name().contains("LOG") || tipo.name().contains("LEAVES")) {
+//			if (destroyed >= maxBlocks / 2 && maxBlocks > 0) {
+//				return destroyed;
+//			}
+//			if (lego.breakNaturally())
+//				destroyed++;
+//
+//			World mundo = lego.getWorld();
+//			int x = lego.getX(), y = lego.getY(), z = lego.getZ();
+//
+//			if (destroyed < maxBlocks || maxBlocks < 0)
+//				destroyed = breakRecUp(mundo.getBlockAt(x, y + 1, z), type, destroyed);
+//
+//			if (destroyed < maxBlocks || maxBlocks < 0)
+//				destroyed = breakRecUp(mundo.getBlockAt(x + 1, y, z), type, destroyed);
+//			if (destroyed < maxBlocks || maxBlocks < 0)
+//				destroyed = breakRecUp(mundo.getBlockAt(x, y, z + 1), type, destroyed);
+//
+//			if (destroyed < maxBlocks || maxBlocks < 0)
+//				destroyed = breakRecUp(mundo.getBlockAt(x + 1, y, z + 1), type, destroyed);
+//			if (destroyed < maxBlocks || maxBlocks < 0)
+//				destroyed = breakRecUp(mundo.getBlockAt(x + 1, y, z - 1), type, destroyed);
+//			if (destroyed < maxBlocks || maxBlocks < 0)
+//				destroyed = breakRecUp(mundo.getBlockAt(x - 1, y, z + 1), type, destroyed);
+//			if (destroyed < maxBlocks || maxBlocks < 0)
+//				destroyed = breakRecUp(mundo.getBlockAt(x - 1, y, z - 1), type, destroyed);
+//		}
+//
+//		return destroyed;
+//	}
+//
+//	private int breakRecDown(Block lego, Material type, int destroyed) {
+//		Material tipo = lego.getBlockData().getMaterial();
+//		if (tipo.name().contains("LOG") || tipo.name().contains("LEAVES")) {
+//			if (destroyed >= maxBlocks && maxBlocks > 0) {
+//				return destroyed;
+//			}
+//			if (lego.breakNaturally())
+//				destroyed++;
+//
+//			World mundo = lego.getWorld();
+//			int x = lego.getX(), y = lego.getY(), z = lego.getZ();
+//
+//			if (destroyed < maxBlocks || maxBlocks < 0)
+//				destroyed = breakRecDown(mundo.getBlockAt(x, y - 1, z), type, destroyed);
+//
+//			if (destroyed < maxBlocks || maxBlocks < 0)
+//				destroyed = breakRecDown(mundo.getBlockAt(x - 1, y, z), type, destroyed);
+//			if (destroyed < maxBlocks || maxBlocks < 0)
+//				destroyed = breakRecDown(mundo.getBlockAt(x, y, z - 1), type, destroyed);
+//
+//			if (destroyed < maxBlocks || maxBlocks < 0)
+//				destroyed = breakRecDown(mundo.getBlockAt(x + 1, y, z + 1), type, destroyed);
+//			if (destroyed < maxBlocks || maxBlocks < 0)
+//				destroyed = breakRecDown(mundo.getBlockAt(x + 1, y, z - 1), type, destroyed);
+//			if (destroyed < maxBlocks || maxBlocks < 0)
+//				destroyed = breakRecDown(mundo.getBlockAt(x - 1, y, z + 1), type, destroyed);
+//			if (destroyed < maxBlocks || maxBlocks < 0)
+//				destroyed = breakRecDown(mundo.getBlockAt(x - 1, y, z - 1), type, destroyed);
+//		}
+//
+//		return destroyed;
+//	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -212,6 +256,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							try {
 								int nuevoMax = Integer.parseInt(args[1]);
 								maxBlocks = nuevoMax < 0 ? -1 : nuevoMax;
+								config.setValue(STRG_MAX_BLOCKS, maxBlocks);
 								sender.sendMessage(
 										header + "Limit set to " + (nuevoMax < 0 ? "unbounded" : nuevoMax) + ".");
 							} catch (NumberFormatException e) {
@@ -250,6 +295,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 										+ " is not a valid argument)");
 								break;
 							}
+							config.setValue(STRG_VIP_MODE, vipMode);
 						}
 					} else {
 						sinPermiso = true;
