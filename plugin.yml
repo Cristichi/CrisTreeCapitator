@@ -1,10 +1,10 @@
 name: CrisTreeCapitator
 main: main.TreeCapitator
-version: ALPHA
+version: v5 BETA
 api-version: 1.13
 commands:
   tc:
-   description: Control CrisTreeCapitator and extra info.
+   description: Controls CrisTreeCapitator and extra info.
    aliases: [treecapitator, treecap]
    usage: /tc help 
    

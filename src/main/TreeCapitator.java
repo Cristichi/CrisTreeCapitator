@@ -44,8 +44,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		updater = new Updater(this, ID, this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false);
 		update = updater.getResult() == Updater.UpdateResult.UPDATE_AVAILABLE;
 
-		// return update;
-		return false;
+		return update;
 	}
 
 	@Override
