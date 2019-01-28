@@ -380,7 +380,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							updater = new Updater(this, ID, this.getFile(), Updater.UpdateType.DEFAULT, true);
 							updater.getResult();
 							sender.sendMessage(
-									header + "Use " + accentColor + "/restart" + textColor + " to apply changes.");
+									header + "Use " + accentColor + "/reload" + textColor + " to apply changes.");
 						} else {
 							sender.sendMessage(header + "This plugin is already up to date.");
 						}
