@@ -3,6 +3,7 @@ package objs;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -163,6 +164,10 @@ public class Configuration extends File implements Cloneable {
 		if (exists()) {
 			delete();
 		}
+		try {
+			getParentFile().mkdirs();
+		} catch (NullPointerException e) {
+		}
 		createNewFile();
 		BufferedWriter writer = new BufferedWriter(new FileWriter(this));
 		writer.write(configTxt);
@@ -173,61 +178,31 @@ public class Configuration extends File implements Cloneable {
 	 * @throws IOException
 	 * 
 	 */
-	public void reloadConfig() throws IOException {
-		BufferedReader reader = new BufferedReader(new FileReader(this));
-		String line;
-		int cont = 0;
-		while ((line = reader.readLine()) != null) {
-			cont++;
-			line = line.trim();
-			if (!line.startsWith("#") && !line.isBlank()) {
-				StringTokenizer st = new StringTokenizer(line, ":");
-				if (st.countTokens() != 2) {
-					reader.close();
-					throw new IOException("Looks like the file content is not correct. Broken line " + cont + " ("
-							+ st.countTokens() + " tokens, should be 2)");
+	public void reloadConfig() {
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(this));
+			String line;
+			int cont = 0;
+			while ((line = reader.readLine()) != null) {
+				cont++;
+				line = line.trim();
+				if (!line.startsWith("#") && !line.isBlank()) {
+					StringTokenizer st = new StringTokenizer(line, ":");
+					if (st.countTokens() != 2) {
+						reader.close();
+						throw new IOException("Looks like the file content is not correct. Broken line " + cont + " ("
+								+ st.countTokens() + " tokens, should be 2)");
+					}
+					String key = st.nextToken().trim();
+					String value = st.nextToken().trim();
+					setValue(key, value);
 				}
-				String key = st.nextToken().trim();
-				String value = st.nextToken().trim();
-				setValue(key, value);
 			}
-		}
-		reader.close();
-	}
-
-	public static void main(String[] args) {
-		Configuration config = new Configuration("config.yml", "CrisTreeCapitator Test Configuration File");
-
-		try {
-			config.reloadConfig();
-		} catch (IOException e2) {
-			e2.printStackTrace();
-		}
-
-		try {
-			config.getBoolean("qkjrnls");
-		} catch (ConfigValueNotFound | ConfigValueNotParsed e1) {
-			e1.printStackTrace();
-		}
-		
-		config.setValue("esto es un string", "String");
-		config.setValue("esto es un booleano", true);
-		config.setValue("esto es un entero", 115);
-		config.setValue("esto es un string de saludar", "hola a todos", "Este valor sirve para saludar");
-		config.setValue("qkjrnls", 115, "Este valor sirve para matarlos");
-		config.setValue("esto es un real", Math.PI);
-		config.setValue("esto es un algo", 115, "Este valor sirve para matarlos");
-
-		try {
-			config.reloadConfig();
-			config.saveConfig();
+			reader.close();
+		} catch (FileNotFoundException e) {
+			System.err.println("Configuration file not created yet. Skipping load.");
 		} catch (IOException e) {
-			System.err.println("Error al guardar la configuración:");
 			e.printStackTrace();
 		}
-
-		System.out.println(config.hm.toString());
-		System.out.println(config.info.toString());
-
 	}
 }
