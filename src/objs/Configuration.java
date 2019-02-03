@@ -144,6 +144,10 @@ public class Configuration extends File implements Cloneable {
 					+ "\" could not be parsed to boolean)");
 		}
 	}
+	
+	public void setInfo(String key, String info) {
+		this.info.put(key, info);
+	}
 
 	/**
 	 * @throws IOException
