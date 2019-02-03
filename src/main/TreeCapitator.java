@@ -11,6 +11,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -29,7 +31,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	// Ajustes
 	private Configuration config;
 	private static final String STRG_MAX_BLOCKS = "destroy limit";
-	private int maxBlocks = 2;
+	private int maxBlocks = -1;
 	private static final String STRG_VIP_MODE = "vip mode";
 	private boolean vipMode = false;
 	private static final String STRG_REPLANT = "replant";
@@ -108,14 +110,24 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				&& (tipo.name().contains("LOG") /* || tipo.name().contains("LEAVES") */)) {
 
 			try {
-				if (replant) {
-					breakRecReplant(primero, tipo, 0);
-				} else {
-					breakRecNoReplant(primero, tipo, 0);
+				boolean cutDown = true;
+				if (axeNeeded) {
+					PlayerInventory inv = e.getPlayer().getInventory();
+					ItemStack mano = inv.getItemInMainHand();
+					if (!mano.getType().name().contains("_AXE")) {
+						cutDown = false;
+					}
 				}
-				e.setCancelled(true);
-				// nt destr = breakRec(primero, tipo, 0);
-				// e.getPlayer().sendMessage(header + "Destroyed " + destr + ".");
+				if (cutDown) {
+					if (replant) {
+						breakRecReplant(primero, tipo, 0);
+					} else {
+						breakRecNoReplant(primero, tipo, 0);
+					}
+					e.setCancelled(true);
+					// nt destr = breakRec(primero, tipo, 0);
+					// e.getPlayer().sendMessage(header + "Destroyed " + destr + ".");
+				}
 			} catch (StackOverflowError e1) {
 			}
 		}
