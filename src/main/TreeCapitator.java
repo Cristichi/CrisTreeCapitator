@@ -390,6 +390,46 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 					break;
 
+				case "setaxe":
+				case "axeneeded":
+					if (sender.hasPermission("cristreecapitator.admin")) {
+						if (args.length != 2) {
+							sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+									+ " <true/false/yes/no>" + textColor + ".");
+						} else {
+							switch (args[1]) {
+							case "true":
+							case "yes":
+								axeNeeded = true;
+								break;
+							case "false":
+							case "no":
+								axeNeeded = false;
+								break;
+
+							default:
+								sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+										+ " <true/false/yes/no>" + textColor + ". (" + accentColor + args[1] + textColor
+										+ " is not a valid argument)");
+								break;
+							}
+							config.setValue(STRG_AXE_NEEDED, axeNeeded);
+							try {
+								config.saveConfig();
+								sender.sendMessage(header + "Replanting " + accentColor
+										+ (replant ? "enabled" : "disabled") + textColor + ".");
+							} catch (IOException e) {
+								sender.sendMessage(header + errorColor
+										+ "Error trying to save the value in the configuration file.");
+								e.printStackTrace();
+							}
+						}
+					} else {
+						sinPermiso = true;
+					}
+
+					break;
+
 				case "reload":
 					if (sender.hasPermission("cristreecapitator.admin")) {
 						loadConfiguration();

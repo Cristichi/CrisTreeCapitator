@@ -1,6 +1,6 @@
 name: CrisTreeCapitator
 main: main.TreeCapitator
-version: 5.1 BETA
+version: 5.1
 api-version: 1.13
 commands:
   tc:
