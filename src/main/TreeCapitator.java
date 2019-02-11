@@ -299,6 +299,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			if (args.length > 0) {
 				switch (args[0]) {
 
+				case "version":
+					sender.sendMessage(header + getName() + " v" + desc.getVersion());
+					break;
+
 				case "help":
 					sender.sendMessage(header + "Commands:\n" + accentColor + "/" + label + " help: " + textColor
 							+ "Shows this help message.\n" + accentColor + "/" + label + " update: " + textColor
