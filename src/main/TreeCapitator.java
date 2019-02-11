@@ -1,6 +1,7 @@
 package main;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -8,11 +9,14 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -34,10 +38,12 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private int maxBlocks = -1;
 	private static final String STRG_VIP_MODE = "vip mode";
 	private boolean vipMode = false;
-	private static final String STRG_REPLANT = "replant";
-	private boolean replant = true;
 	private static final String STRG_AXE_NEEDED = "axe needed";
 	private boolean axeNeeded = true;
+	private static final String STRG_REPLANT = "replant";
+	private boolean replant = true;
+	private static final String STRG_INVINCIBLE_REPLANT = "invincible replant";
+	private boolean invincibleReplant = true;
 
 	// Updater
 	private static final int ID = 294976;
@@ -79,19 +85,24 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		config.setInfo(STRG_VIP_MODE,
 				"Sets vip mode. If enabled, a permission node (cristreecapitator.vip) is required to take down trees at once.");
 
+		axeNeeded = config.getBoolean(STRG_AXE_NEEDED, axeNeeded);
+		config.setInfo(STRG_AXE_NEEDED, "Sets if an axe is required to Cut down trees at once.");
+
 		replant = config.getBoolean(STRG_REPLANT, replant);
 		config.setInfo(STRG_REPLANT, "Sets if trees should be replanted automatically.");
 
-		axeNeeded = config.getBoolean(STRG_AXE_NEEDED, axeNeeded);
-		config.setInfo(STRG_AXE_NEEDED, "Sets if an axe is required to Cut down trees at once.");
+		replant = config.getBoolean(STRG_INVINCIBLE_REPLANT, invincibleReplant);
+		config.setInfo(STRG_INVINCIBLE_REPLANT,
+				"Sets if saplings replanted by this plugin whould be unbreakable (the block behind too).");
 	}
 
 	private void saveConfiguration() {
 		try {
 			config.setValue(STRG_MAX_BLOCKS, maxBlocks);
-			config.setValue(STRG_REPLANT, replant);
 			config.setValue(STRG_VIP_MODE, vipMode);
 			config.setValue(STRG_AXE_NEEDED, axeNeeded);
+			config.setValue(STRG_REPLANT, replant);
+			config.setValue(STRG_INVINCIBLE_REPLANT, invincibleReplant);
 			config.saveConfig();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -107,14 +118,14 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private void onBlockBreak(BlockBreakEvent e) {
 		Block primero = e.getBlock();
 		Material tipo = primero.getBlockData().getMaterial();
+		Player player = e.getPlayer();
 
-		if ((vipMode && e.getPlayer().hasPermission("cristreecapitator.vip") || !vipMode)
+		if (!e.isCancelled() && (vipMode && player.hasPermission("cristreecapitator.vip") || !vipMode)
 				&& (tipo.name().contains("LOG") /* || tipo.name().contains("LEAVES") */)) {
-
 			try {
 				boolean cutDown = true;
 				if (axeNeeded) {
-					PlayerInventory inv = e.getPlayer().getInventory();
+					PlayerInventory inv = player.getInventory();
 					ItemStack mano = inv.getItemInMainHand();
 					if (!mano.getType().name().contains("_AXE")) {
 						cutDown = false;
@@ -127,10 +138,30 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 						breakRecNoReplant(primero, tipo, 0);
 					}
 					e.setCancelled(true);
-					// nt destr = breakRec(primero, tipo, 0);
-					// e.getPlayer().sendMessage(header + "Destroyed " + destr + ".");
 				}
 			} catch (StackOverflowError e1) {
+			}
+		} else if (invincibleReplant) {
+			List<MetadataValue> metasReplant = primero.getMetadata(STRG_INVINCIBLE_REPLANT);
+			for (MetadataValue metareplant : metasReplant) {
+				if (metareplant.asBoolean()) {
+					long actual = System.currentTimeMillis();
+					if (player.hasPermission("cristreecapitator.admin")) {
+						List<MetadataValue> metasMsg = player.getMetadata("msged");
+						if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
+							player.sendMessage(header + "You broke a protected block. Sorry if it was bugged.");
+							player.setMetadata("msged", new FixedMetadataValue(this, actual));
+						}
+					} else {
+						List<MetadataValue> metasMsg = player.getMetadata("msged");
+						if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
+							player.sendMessage(header + "This sapling is protected, please don't try to break it.");
+							player.setMetadata("msged", new FixedMetadataValue(this, actual));
+						}
+						e.setCancelled(true);
+					}
+					break;
+				}
 			}
 		}
 	}
@@ -213,6 +244,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 						return destroyed;
 					break;
 				}
+				if (replant) {
+					lego.setMetadata(STRG_INVINCIBLE_REPLANT, new FixedMetadataValue(this, true));
+					below.setMetadata(STRG_INVINCIBLE_REPLANT, new FixedMetadataValue(this, true));
+				}
 			} else {
 				if (lego.breakNaturally()) {
 					destroyed++;
@@ -265,13 +300,17 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				switch (args[0]) {
 
 				case "help":
-					sender.sendMessage(header + "Commands:\n" + accentColor + "/" + label + " help:" + textColor
-							+ " Shows this help message.\n" + accentColor + "/" + label + " update:" + textColor
-							+ " Updates the plugin if there is a new version.\n" + accentColor + "/" + label
-							+ " setlimit <number>:" + textColor
-							+ " Sets the block limit to break each time. Negative number for unlimited.\n" + accentColor
-							+ "/" + label + " vipmode <true/false>:" + textColor
-							+ " Enables or disables Vip Mode (if cristreecapitator.vip is needed to take down trees at once)");
+					sender.sendMessage(header + "Commands:\n" + accentColor + "/" + label + " help: " + textColor
+							+ "Shows this help message.\n" + accentColor + "/" + label + " update: " + textColor
+							+ "Updates the plugin if there is a new version.\n" + accentColor + "/" + label
+							+ " setlimit <number>: " + textColor
+							+ "Sets the block limit to break each time. Negative number for unlimited.\n" + accentColor
+							+ "/" + label + " vipmode <true/false>: " + textColor
+							+ "Enables or disables Vip Mode (if cristreecapitator.vip is needed to take down trees at once)\n"
+							+ accentColor + "/" + label + " setreplant <true/false>: " + textColor
+							+ "Enables autoreplanting.\n" + accentColor + "/" + label
+							+ " setInvincibleReplanting <true/false>: " + textColor
+							+ "Replanted saplings are invincible. Ignored if replanting is not enabled.");
 
 					break;
 
@@ -280,9 +319,6 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				case "blocklimit":
 					if (sender.hasPermission("cristreecapitator.admin")) {
 						if (args.length != 2) {
-//							sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
-//									+ " <number>" + textColor + ".");
-
 							sender.sendMessage(header + "Blocks destroyed at once limit is currently " + accentColor
 									+ maxBlocks + textColor + ".");
 						} else {
@@ -379,6 +415,46 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							try {
 								config.saveConfig();
 								sender.sendMessage(header + "Replanting " + accentColor
+										+ (replant ? "enabled" : "disabled") + textColor + ".");
+							} catch (IOException e) {
+								sender.sendMessage(header + errorColor
+										+ "Error trying to save the value in the configuration file.");
+								e.printStackTrace();
+							}
+						}
+					} else {
+						sinPermiso = true;
+					}
+
+					break;
+
+				case "setinvinciblereplant":
+				case "invinciblereplant":
+					if (sender.hasPermission("cristreecapitator.admin")) {
+						if (args.length != 2) {
+							sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+									+ " <true/false/yes/no>" + textColor + ".");
+						} else {
+							switch (args[1]) {
+							case "true":
+							case "yes":
+								invincibleReplant = true;
+								break;
+							case "false":
+							case "no":
+								invincibleReplant = false;
+								break;
+
+							default:
+								sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+										+ " <true/false/yes/no>" + textColor + ". (" + accentColor + args[1] + textColor
+										+ " is not a valid argument)");
+								break;
+							}
+							config.setValue(STRG_INVINCIBLE_REPLANT, invincibleReplant);
+							try {
+								config.saveConfig();
+								sender.sendMessage(header + "Invincible replanted saplings " + accentColor
 										+ (replant ? "enabled" : "disabled") + textColor + ".");
 							} catch (IOException e) {
 								sender.sendMessage(header + errorColor
