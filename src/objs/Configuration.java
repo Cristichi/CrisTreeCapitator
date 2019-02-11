@@ -190,7 +190,7 @@ public class Configuration extends File implements Cloneable {
 			while ((line = reader.readLine()) != null) {
 				cont++;
 				line = line.trim();
-				if (!line.startsWith("#") && !line.isBlank()) {
+				if (!line.startsWith("#") && !line.trim().isEmpty()) {
 					StringTokenizer st = new StringTokenizer(line, ":");
 					if (st.countTokens() != 2) {
 						reader.close();

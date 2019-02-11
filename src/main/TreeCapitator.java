@@ -70,16 +70,18 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	private void loadConfiguration() {
 		config.reloadConfig();
-		
+
 		maxBlocks = config.getInt(STRG_MAX_BLOCKS, maxBlocks);
-		config.setInfo(STRG_MAX_BLOCKS, "Sets the maximun number of logs and leaves that can be destroyed at once. -1 to unlimit.");
-		
+		config.setInfo(STRG_MAX_BLOCKS,
+				"Sets the maximun number of logs and leaves that can be destroyed at once. -1 to unlimit.");
+
 		vipMode = config.getBoolean(STRG_VIP_MODE, vipMode);
-		config.setInfo(STRG_VIP_MODE, "Sets vip mode. If enabled, a permission node (cristreecapitator.vip) is required to take down trees at once.");
-		
+		config.setInfo(STRG_VIP_MODE,
+				"Sets vip mode. If enabled, a permission node (cristreecapitator.vip) is required to take down trees at once.");
+
 		replant = config.getBoolean(STRG_REPLANT, replant);
 		config.setInfo(STRG_REPLANT, "Sets if trees should be replanted automatically.");
-		
+
 		axeNeeded = config.getBoolean(STRG_AXE_NEEDED, axeNeeded);
 		config.setInfo(STRG_AXE_NEEDED, "Sets if an axe is required to Cut down trees at once.");
 	}
