@@ -459,7 +459,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							try {
 								config.saveConfig();
 								sender.sendMessage(header + "Invincible replanted saplings " + accentColor
-										+ (replant ? "enabled" : "disabled") + textColor + ".");
+										+ (invincibleReplant ? "enabled" : "disabled") + textColor + ".");
 							} catch (IOException e) {
 								sender.sendMessage(header + errorColor
 										+ "Error trying to save the value in the configuration file.");
