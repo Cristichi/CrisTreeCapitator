@@ -313,7 +313,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							+ "Enables or disables Vip Mode (if cristreecapitator.vip is needed to take down trees at once)\n"
 							+ accentColor + "/" + label + " setreplant <true/false>: " + textColor
 							+ "Enables autoreplanting.\n" + accentColor + "/" + label
-							+ " setInvincibleReplanting <true/false>: " + textColor
+							+ " setinvinciblereplant <true/false>: " + textColor
 							+ "Replanted saplings are invincible. Ignored if replanting is not enabled.");
 
 					break;
