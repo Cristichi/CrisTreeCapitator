@@ -43,7 +43,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private static final String STRG_REPLANT = "replant";
 	private boolean replant = true;
 	private static final String STRG_INVINCIBLE_REPLANT = "invincible replant";
-	private boolean invincibleReplant = true;
+	private boolean invincibleReplant = false;
+
+	//Ajustes tiempo de ejecución
+	private static final String PLAYER_ENABLE_META = "cristichi_treecap_meta_disable";
 
 	// Updater
 	private static final int ID = 294976;
@@ -63,9 +66,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 		if (checkUpdate()) {
 			getServer().getConsoleSender()
-					.sendMessage(header + ChatColor.GREEN
-							+ "An update is available, use /tc update to update to the lastest version (from v"
-							+ desc.getVersion() + " to v" + updater.getRemoteVersion() + ")");
+			.sendMessage(header + ChatColor.GREEN
+					+ "An update is available, use /tc update to update to the lastest version (from v"
+					+ desc.getVersion() + " to v" + updater.getRemoteVersion() + ")");
 		}
 
 		config = new Configuration("plugins/CrisTreeCapitator/config.yml", "Cristichi's TreeCapitator");
@@ -91,7 +94,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		replant = config.getBoolean(STRG_REPLANT, replant);
 		config.setInfo(STRG_REPLANT, "Sets if trees should be replanted automatically.");
 
-		replant = config.getBoolean(STRG_INVINCIBLE_REPLANT, invincibleReplant);
+		invincibleReplant = config.getBoolean(STRG_INVINCIBLE_REPLANT, invincibleReplant);
 		config.setInfo(STRG_INVINCIBLE_REPLANT,
 				"Sets if saplings replanted by this plugin whould be unbreakable (the block behind too).");
 	}
@@ -120,7 +123,13 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		Material tipo = primero.getBlockData().getMaterial();
 		Player player = e.getPlayer();
 
-		if (!e.isCancelled() && (vipMode && player.hasPermission("cristreecapitator.vip") || !vipMode)
+		boolean enabled = true;
+		List<MetadataValue> metas = player.getMetadata(PLAYER_ENABLE_META);
+		for (MetadataValue meta : metas) {
+			enabled = meta.asBoolean();
+		}
+		
+		if (enabled && !e.isCancelled() && (vipMode && player.hasPermission("cristreecapitator.vip") || !vipMode)
 				&& (tipo.name().contains("LOG") /* || tipo.name().contains("LEAVES") */)) {
 			try {
 				boolean cutDown = true;
@@ -149,7 +158,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					if (player.hasPermission("cristreecapitator.admin")) {
 						List<MetadataValue> metasMsg = player.getMetadata("msged");
 						if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
-							player.sendMessage(header + "You broke a protected block. Sorry if it was bugged.");
+							player.sendMessage(header + "You broke a protected block.");
 							player.setMetadata("msged", new FixedMetadataValue(this, actual));
 						}
 					} else {
@@ -299,23 +308,49 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			if (args.length > 0) {
 				switch (args[0]) {
 
+				case "help":
+					sender.sendMessage(header + "Commands:\n" 
+							+ accentColor + "/" + label + " help: " + textColor + "Shows this help message.\n" 
+							+ accentColor + "/" + label + " update: " + textColor + "Updates the plugin if there is a new version.\n" 
+							+ accentColor + "/" + label + " setlimit <number>: " + textColor + "Sets the block limit to break each time. Negative number for unlimited.\n"
+							+ accentColor + "/" + label + " vipmode <true/false>: " + textColor + "Enables or disables Vip Mode (if cristreecapitator.vip is needed to take down trees at once)\n"
+							+ accentColor + "/" + label + " setreplant <true/false>: " + textColor + "Enables autoreplanting.\n" 
+							+ accentColor + "/" + label + " setInvincibleReplanting <true/false>: " + textColor + "Replanted saplings are invincible. Ignored if replanting is not enabled.\n"
+							+ accentColor + "/" + label + " toggle <true/false>: " + textColor + "Toggles the plugin to work on you."
+							);
+
+					break;
+
 				case "version":
 					sender.sendMessage(header + getName() + " v" + desc.getVersion());
 					break;
 
-				case "help":
-					sender.sendMessage(header + "Commands:\n" + accentColor + "/" + label + " help: " + textColor
-							+ "Shows this help message.\n" + accentColor + "/" + label + " update: " + textColor
-							+ "Updates the plugin if there is a new version.\n" + accentColor + "/" + label
-							+ " setlimit <number>: " + textColor
-							+ "Sets the block limit to break each time. Negative number for unlimited.\n" + accentColor
-							+ "/" + label + " vipmode <true/false>: " + textColor
-							+ "Enables or disables Vip Mode (if cristreecapitator.vip is needed to take down trees at once)\n"
-							+ accentColor + "/" + label + " setreplant <true/false>: " + textColor
-							+ "Enables autoreplanting.\n" + accentColor + "/" + label
-							+ " setInvincibleReplanting <true/false>: " + textColor
-							+ "Replanted saplings are invincible. Ignored if replanting is not enabled.");
+				case "values":
+					sender.sendMessage(header + "Values" 
+							+ accentColor + "\nLimit: " + textColor + (maxBlocks < 0 ? "unbounded" : maxBlocks)
+							+ accentColor + "\nReplant: " + textColor + (replant ? "enabled" : "disabled") 
+							+ accentColor + "\nInvincible replant: " + textColor + (invincibleReplant ? "enabled" : "disabled")
+							+ accentColor + "\nVip Mode: " + textColor + (vipMode ? "enabled" : "disabled")
+							+ accentColor + "\nAxe Needed: " + textColor + (axeNeeded ? "enabled" : "disabled")
+							);
+					break;
 
+					//Añadir case "on" y "off"
+				case "toggle":
+					if (sender instanceof Player) {
+						List<MetadataValue> metas = ((Player) sender).getMetadata(PLAYER_ENABLE_META);
+						if (metas.isEmpty()) {
+							((Player) sender).setMetadata(PLAYER_ENABLE_META, new FixedMetadataValue(this, false));
+							sender.sendMessage(header + "Cristichi's Tree Capitator is disabled for you now. Use /"+label+" toggle again to enable it.");
+						}
+						for (MetadataValue meta : metas) {
+							boolean este = !meta.asBoolean();
+							((Player) sender).setMetadata(PLAYER_ENABLE_META, new FixedMetadataValue(this, este));
+							sender.sendMessage(header + "Cristichi's Tree Capitator is "+(meta.asBoolean()?"disabled":"enabled") + " for you.");
+						}
+					} else {
+						sender.sendMessage(header + "This plugin can only be used for players");
+					}
 					break;
 
 				case "limit":
@@ -434,6 +469,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 				case "setinvinciblereplant":
 				case "invinciblereplant":
+				case "invinciblereplants":
+				case "invinciblereplanting":
+				case "invinciblereplantings":
 					if (sender.hasPermission("cristreecapitator.admin")) {
 						if (args.length != 2) {
 							sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]

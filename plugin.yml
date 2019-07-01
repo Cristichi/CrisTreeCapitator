@@ -1,12 +1,12 @@
 name: CrisTreeCapitator
 main: main.TreeCapitator
-version: 5.3
+version: 5.7
 api-version: 1.13
 commands:
   tc:
    description: Controls CrisTreeCapitator and gives information.
    aliases: [treecapitator, treecap]
-   usage: /tc help 
+   usage: /tc help
    
 permissions:
   cristreecapitator.*:
@@ -22,5 +22,5 @@ permissions:
     description: Allows you to cut down trees at once
     default: true
   cristreecapitator.vip:
-    description: Allows you to cut down trees at once when VIP MODE is enabled
+    description: Allows you to cut down trees at once even if VIP MODE is enabled
     default: false
