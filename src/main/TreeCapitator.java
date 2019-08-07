@@ -294,10 +294,11 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-
+		label = label.toLowerCase();
 		boolean bueno = label.equals(command.getLabel());
 		String[] cmds = command.getAliases().toArray(new String[] {});
 		for (int i = 0; i < cmds.length && !bueno; i++) {
+			cmds[i] = cmds[i].toLowerCase();
 			if (label.equals(cmds[i])) {
 				bueno = true;
 			}
@@ -306,7 +307,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		boolean sinPermiso = false;
 		if (bueno) {
 			if (args.length > 0) {
-				switch (args[0]) {
+				switch (args[0].toLowerCase()) {
 
 				case "help":
 					sender.sendMessage(header + "Commands:\n" 
@@ -316,6 +317,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							+ accentColor + "/" + label + " vipmode <true/false>: " + textColor + "Enables or disables Vip Mode (if cristreecapitator.vip is needed to take down trees at once)\n"
 							+ accentColor + "/" + label + " setreplant <true/false>: " + textColor + "Enables autoreplanting.\n" 
 							+ accentColor + "/" + label + " setInvincibleReplanting <true/false>: " + textColor + "Replanted saplings are invincible. Ignored if replanting is not enabled.\n"
+							+ accentColor + "/" + label + " setAxeNeeded <true/false>: " + textColor + "Sets if an axe is needed for the plugin to act.\n"
 							+ accentColor + "/" + label + " toggle <true/false>: " + textColor + "Toggles the plugin to work on you."
 							);
 
@@ -512,6 +514,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 				case "setaxe":
 				case "axeneeded":
+				case "setaxeneeded":
 					if (sender.hasPermission("cristreecapitator.admin")) {
 						if (args.length != 2) {
 							sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
@@ -536,8 +539,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							config.setValue(STRG_AXE_NEEDED, axeNeeded);
 							try {
 								config.saveConfig();
-								sender.sendMessage(header + "Replanting " + accentColor
-										+ (replant ? "enabled" : "disabled") + textColor + ".");
+								sender.sendMessage(header + 
+										(axeNeeded ? "Axe " + accentColor + "needed" 
+												   : "Axe " + accentColor + "not needed" ));
 							} catch (IOException e) {
 								sender.sendMessage(header + errorColor
 										+ "Error trying to save the value in the configuration file.");
