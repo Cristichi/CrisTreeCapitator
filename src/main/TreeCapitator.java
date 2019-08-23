@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -123,53 +124,55 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		Material tipo = primero.getBlockData().getMaterial();
 		Player player = e.getPlayer();
 
-		boolean enabled = true;
-		List<MetadataValue> metas = player.getMetadata(PLAYER_ENABLE_META);
-		for (MetadataValue meta : metas) {
-			enabled = meta.asBoolean();
-		}
-		
-		if (enabled && !e.isCancelled() && (vipMode && player.hasPermission("cristreecapitator.vip") || !vipMode)
-				&& (tipo.name().contains("LOG") /* || tipo.name().contains("LEAVES") */)) {
-			try {
-				boolean cutDown = true;
-				if (axeNeeded) {
-					PlayerInventory inv = player.getInventory();
-					ItemStack mano = inv.getItemInMainHand();
-					if (!mano.getType().name().contains("_AXE")) {
-						cutDown = false;
-					}
-				}
-				if (cutDown) {
-					if (replant) {
-						breakRecReplant(primero, tipo, 0);
-					} else {
-						breakRecNoReplant(primero, tipo, 0);
-					}
-					e.setCancelled(true);
-				}
-			} catch (StackOverflowError e1) {
+		if (player.getGameMode().equals(GameMode.SURVIVAL)) {
+			boolean enabled = true;
+			List<MetadataValue> metas = player.getMetadata(PLAYER_ENABLE_META);
+			for (MetadataValue meta : metas) {
+				enabled = meta.asBoolean();
 			}
-		} else if (invincibleReplant) {
-			List<MetadataValue> metasReplant = primero.getMetadata(STRG_INVINCIBLE_REPLANT);
-			for (MetadataValue metareplant : metasReplant) {
-				if (metareplant.asBoolean()) {
-					long actual = System.currentTimeMillis();
-					if (player.hasPermission("cristreecapitator.admin")) {
-						List<MetadataValue> metasMsg = player.getMetadata("msged");
-						if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
-							player.sendMessage(header + "You broke a protected block.");
-							player.setMetadata("msged", new FixedMetadataValue(this, actual));
+
+			if (enabled && !e.isCancelled() && (vipMode && player.hasPermission("cristreecapitator.vip") || !vipMode)
+					&& (tipo.name().contains("LOG") /* || tipo.name().contains("LEAVES") */)) {
+				try {
+					boolean cutDown = true;
+					if (axeNeeded) {
+						PlayerInventory inv = player.getInventory();
+						ItemStack mano = inv.getItemInMainHand();
+						if (!mano.getType().name().contains("_AXE")) {
+							cutDown = false;
 						}
-					} else {
-						List<MetadataValue> metasMsg = player.getMetadata("msged");
-						if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
-							player.sendMessage(header + "This sapling is protected, please don't try to break it.");
-							player.setMetadata("msged", new FixedMetadataValue(this, actual));
+					}
+					if (cutDown) {
+						if (replant) {
+							breakRecReplant(primero, tipo, 0);
+						} else {
+							breakRecNoReplant(primero, tipo, 0);
 						}
 						e.setCancelled(true);
 					}
-					break;
+				} catch (StackOverflowError e1) {
+				}
+			} else if (invincibleReplant) {
+				List<MetadataValue> metasReplant = primero.getMetadata(STRG_INVINCIBLE_REPLANT);
+				for (MetadataValue metareplant : metasReplant) {
+					if (metareplant.asBoolean()) {
+						long actual = System.currentTimeMillis();
+						if (player.hasPermission("cristreecapitator.admin")) {
+							List<MetadataValue> metasMsg = player.getMetadata("msged");
+							if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
+								player.sendMessage(header + "You broke a protected block.");
+								player.setMetadata("msged", new FixedMetadataValue(this, actual));
+							}
+						} else {
+							List<MetadataValue> metasMsg = player.getMetadata("msged");
+							if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
+								player.sendMessage(header + "This sapling is protected, please don't try to break it.");
+								player.setMetadata("msged", new FixedMetadataValue(this, actual));
+							}
+							e.setCancelled(true);
+						}
+						break;
+					}
 				}
 			}
 		}
@@ -541,7 +544,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 								config.saveConfig();
 								sender.sendMessage(header + 
 										(axeNeeded ? "Axe " + accentColor + "needed" 
-												   : "Axe " + accentColor + "not needed" ));
+												: "Axe " + accentColor + "not needed" ));
 							} catch (IOException e) {
 								sender.sendMessage(header + errorColor
 										+ "Error trying to save the value in the configuration file.");
