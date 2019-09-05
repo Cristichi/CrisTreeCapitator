@@ -120,10 +120,11 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	@EventHandler
 	private void onBlockBreak(BlockBreakEvent e) {
-		Block primero = e.getBlock();
-		Material tipo = primero.getBlockData().getMaterial();
-		Player player = e.getPlayer();
+		final Block primero = e.getBlock();
+		final Material tipo = primero.getBlockData().getMaterial();
+		final Player player = e.getPlayer();
 
+		player.sendMessage("Run");
 		if (player.getGameMode().equals(GameMode.SURVIVAL)) {
 			boolean enabled = true;
 			List<MetadataValue> metas = player.getMetadata(PLAYER_ENABLE_META);
@@ -161,13 +162,13 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							List<MetadataValue> metasMsg = player.getMetadata("msged");
 							if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
 								player.sendMessage(header + "You broke a protected block.");
-								player.setMetadata("msged", new FixedMetadataValue(this, actual));
+								player.setMetadata("msged", new FixedMetadataValue(TreeCapitator.this, actual));
 							}
 						} else {
 							List<MetadataValue> metasMsg = player.getMetadata("msged");
 							if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
 								player.sendMessage(header + "This sapling is protected, please don't try to break it.");
-								player.setMetadata("msged", new FixedMetadataValue(this, actual));
+								player.setMetadata("msged", new FixedMetadataValue(TreeCapitator.this, actual));
 							}
 							e.setCancelled(true);
 						}
@@ -176,6 +177,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				}
 			}
 		}
+
 	}
 
 	private int breakRecNoReplant(Block lego, Material type, int destroyed) {
