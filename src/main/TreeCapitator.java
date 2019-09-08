@@ -68,13 +68,11 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() {
-		try {
-			wg = (WorldGuardPlugin) getServer().getPluginManager().getPlugin("WorldGuard");
-			getLogger().info("WorldGuard found, extra protection enabled.");
-		}catch (NoClassDefFoundError e) {
+		wg = (WorldGuardPlugin) getServer().getPluginManager().getPlugin("WorldGuard");
+		if (wg==null) 
 			getLogger().info("WorldGuard not found.");
-		}
-		
+		else
+			getLogger().info("WorldGuard found, extra protection enabled.");
 		
 		getServer().getPluginManager().registerEvents(this, this);
 
@@ -136,7 +134,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		final Block primero = e.getBlock();
 		final Material tipo = primero.getBlockData().getMaterial();
 		final Player player = e.getPlayer();
-		if (wg!=null && !wg.createProtectionQuery().testBlockBreak(player, primero))
+		if (wg!=null &&
+				!wg.createProtectionQuery().testBlockBreak(player, primero))
 			return;
 
 		if (player.getGameMode().equals(GameMode.SURVIVAL)) {
