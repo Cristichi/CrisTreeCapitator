@@ -21,6 +21,8 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+
 import objs.Configuration;
 import updater.Updater;
 
@@ -32,6 +34,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private final ChatColor accentColor = ChatColor.DARK_AQUA;
 	private final ChatColor errorColor = ChatColor.DARK_RED;
 	private final String header = mainColor + "[" + desc.getName() + "] " + textColor;
+	
+	//Dependencias
+	private WorldGuardPlugin wg;
 
 	// Ajustes
 	private Configuration config;
@@ -63,6 +68,14 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() {
+		try {
+			wg = (WorldGuardPlugin) getServer().getPluginManager().getPlugin("WorldGuard");
+			getLogger().info("WorldGuard found, extra protection enabled.");
+		}catch (NoClassDefFoundError e) {
+			getLogger().info("WorldGuard not found.");
+		}
+		
+		
 		getServer().getPluginManager().registerEvents(this, this);
 
 		if (checkUpdate()) {
@@ -123,8 +136,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		final Block primero = e.getBlock();
 		final Material tipo = primero.getBlockData().getMaterial();
 		final Player player = e.getPlayer();
+		if (!wg.createProtectionQuery().testBlockBreak(player, primero))
+			return;
 
-		player.sendMessage("Run");
 		if (player.getGameMode().equals(GameMode.SURVIVAL)) {
 			boolean enabled = true;
 			List<MetadataValue> metas = player.getMetadata(PLAYER_ENABLE_META);
@@ -145,9 +159,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					}
 					if (cutDown) {
 						if (replant) {
-							breakRecReplant(primero, tipo, 0);
+							breakRecReplant(player, primero, tipo, 0);
 						} else {
-							breakRecNoReplant(primero, tipo, 0);
+							breakRecNoReplant(player, primero, tipo, 0);
 						}
 						e.setCancelled(true);
 					}
@@ -180,7 +194,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	}
 
-	private int breakRecNoReplant(Block lego, Material type, int destroyed) {
+	private int breakRecNoReplant(Player player, Block lego, Material type, int destroyed) {
+		if (!wg.createProtectionQuery().testBlockBreak(player, lego))
+			return destroyed;
 		Material tipo = lego.getBlockData().getMaterial();
 		if (tipo.name().contains("LOG") || tipo.name().contains("LEAVES")) {
 			if (destroyed > maxBlocks && maxBlocks > 0) {
@@ -195,34 +211,36 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			int x = lego.getX(), y = lego.getY(), z = lego.getZ();
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(mundo.getBlockAt(x, y - 1, z), type, destroyed);
+				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x, y - 1, z), type, destroyed);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(mundo.getBlockAt(x, y + 1, z), type, destroyed);
+				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x, y + 1, z), type, destroyed);
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(mundo.getBlockAt(x + 1, y, z + 1), type, destroyed);
+				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x + 1, y, z + 1), type, destroyed);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(mundo.getBlockAt(x + 1, y, z - 1), type, destroyed);
+				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x + 1, y, z - 1), type, destroyed);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(mundo.getBlockAt(x - 1, y, z + 1), type, destroyed);
+				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x - 1, y, z + 1), type, destroyed);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(mundo.getBlockAt(x - 1, y, z - 1), type, destroyed);
+				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x - 1, y, z - 1), type, destroyed);
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(mundo.getBlockAt(x + 1, y, z), type, destroyed);
+				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x + 1, y, z), type, destroyed);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(mundo.getBlockAt(x, y, z + 1), type, destroyed);
+				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x, y, z + 1), type, destroyed);
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(mundo.getBlockAt(x - 1, y, z), type, destroyed);
+				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x - 1, y, z), type, destroyed);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(mundo.getBlockAt(x, y, z - 1), type, destroyed);
+				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x, y, z - 1), type, destroyed);
 		}
 
 		return destroyed;
 	}
 
-	private int breakRecReplant(Block lego, Material type, int destroyed) {
+	private int breakRecReplant(Player player, Block lego, Material type, int destroyed) {
+		if (!wg.createProtectionQuery().testBlockBreak(player, lego))
+			return destroyed;
 		Material tipo = lego.getBlockData().getMaterial();
 		if (tipo.name().contains("LOG") || tipo.name().contains("LEAVES")) {
 			if (maxBlocks > 0 && destroyed > maxBlocks) {
@@ -270,28 +288,28 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			}
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(mundo.getBlockAt(x, y - 1, z), type, destroyed);
+				destroyed = breakRecReplant(player, mundo.getBlockAt(x, y - 1, z), type, destroyed);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(mundo.getBlockAt(x, y + 1, z), type, destroyed);
+				destroyed = breakRecReplant(player, mundo.getBlockAt(x, y + 1, z), type, destroyed);
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(mundo.getBlockAt(x + 1, y, z + 1), type, destroyed);
+				destroyed = breakRecReplant(player, mundo.getBlockAt(x + 1, y, z + 1), type, destroyed);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(mundo.getBlockAt(x + 1, y, z - 1), type, destroyed);
+				destroyed = breakRecReplant(player, mundo.getBlockAt(x + 1, y, z - 1), type, destroyed);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(mundo.getBlockAt(x - 1, y, z + 1), type, destroyed);
+				destroyed = breakRecReplant(player, mundo.getBlockAt(x - 1, y, z + 1), type, destroyed);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(mundo.getBlockAt(x - 1, y, z - 1), type, destroyed);
+				destroyed = breakRecReplant(player, mundo.getBlockAt(x - 1, y, z - 1), type, destroyed);
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(mundo.getBlockAt(x + 1, y, z), type, destroyed);
+				destroyed = breakRecReplant(player, mundo.getBlockAt(x + 1, y, z), type, destroyed);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(mundo.getBlockAt(x, y, z + 1), type, destroyed);
+				destroyed = breakRecReplant(player, mundo.getBlockAt(x, y, z + 1), type, destroyed);
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(mundo.getBlockAt(x - 1, y, z), type, destroyed);
+				destroyed = breakRecReplant(player, mundo.getBlockAt(x - 1, y, z), type, destroyed);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(mundo.getBlockAt(x, y, z - 1), type, destroyed);
+				destroyed = breakRecReplant(player, mundo.getBlockAt(x, y, z - 1), type, destroyed);
 		}
 
 		return destroyed;
