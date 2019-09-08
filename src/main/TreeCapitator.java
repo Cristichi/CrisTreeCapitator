@@ -136,7 +136,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		final Block primero = e.getBlock();
 		final Material tipo = primero.getBlockData().getMaterial();
 		final Player player = e.getPlayer();
-		if (!wg.createProtectionQuery().testBlockBreak(player, primero))
+		if (wg!=null && !wg.createProtectionQuery().testBlockBreak(player, primero))
 			return;
 
 		if (player.getGameMode().equals(GameMode.SURVIVAL)) {
@@ -195,7 +195,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	}
 
 	private int breakRecNoReplant(Player player, Block lego, Material type, int destroyed) {
-		if (!wg.createProtectionQuery().testBlockBreak(player, lego))
+		if (wg!=null && !wg.createProtectionQuery().testBlockBreak(player, lego))
 			return destroyed;
 		Material tipo = lego.getBlockData().getMaterial();
 		if (tipo.name().contains("LOG") || tipo.name().contains("LEAVES")) {
@@ -239,7 +239,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	}
 
 	private int breakRecReplant(Player player, Block lego, Material type, int destroyed) {
-		if (!wg.createProtectionQuery().testBlockBreak(player, lego))
+		if (wg!=null && !wg.createProtectionQuery().testBlockBreak(player, lego))
 			return destroyed;
 		Material tipo = lego.getBlockData().getMaterial();
 		if (tipo.name().contains("LOG") || tipo.name().contains("LEAVES")) {
