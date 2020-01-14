@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -29,13 +30,14 @@ import updater.Updater;
 public class TreeCapitator extends JavaPlugin implements Listener {
 	private PluginDescriptionFile desc = getDescription();
 
+	// Colores
 	private final ChatColor mainColor = ChatColor.BLUE;
 	private final ChatColor textColor = ChatColor.AQUA;
 	private final ChatColor accentColor = ChatColor.DARK_AQUA;
 	private final ChatColor errorColor = ChatColor.DARK_RED;
 	private final String header = mainColor + "[" + desc.getName() + "] " + textColor;
 	
-	//Dependencias
+	// Dependencias
 	private WorldGuardPlugin wg;
 
 	// Ajustes
@@ -50,8 +52,11 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private boolean replant = true;
 	private static final String STRG_INVINCIBLE_REPLANT = "invincible replant";
 	private boolean invincibleReplant = false;
+	
+	// Mensajes
+	private final String joinMensaje = header+"Recuerda "+accentColor+"{player}"+textColor+", puedes usar "+accentColor+"/tc toggle"+textColor+" para no romper cosas hechas de troncos sin querer.";
 
-	//Ajustes tiempo de ejecución
+	// Ajustes tiempo de ejecución
 	private static final String PLAYER_ENABLE_META = "cristichi_treecap_meta_disable";
 
 	// Updater
@@ -127,6 +132,12 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	@Override
 	public void onDisable() {
 		getLogger().info("Disabled");
+	}
+	
+	@EventHandler
+	public void onJoin(PlayerJoinEvent e) {
+		Player p = e.getPlayer();
+		p.sendMessage(joinMensaje.replace("{player}", p.getDisplayName()));
 	}
 
 	@EventHandler
