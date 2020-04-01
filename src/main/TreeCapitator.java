@@ -59,7 +59,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private final String joinMensaje = header + "Remember " + accentColor + "{player}" + textColor + ", you can use "
 			+ accentColor + "/tc toggle" + textColor + " to avoid breaking things made of logs.";
 
-	// Ajustes tiempo de ejecuci�n
+	// Ajustes tiempo de ejecución
 	private static final String PLAYER_ENABLE_META = "cristichi_treecap_meta_disable";
 
 	// Updater
@@ -390,7 +390,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							+ (axeNeeded ? "enabled" : "disabled"));
 					break;
 
-				// A�adir case "on" y "off"
+				// Añadir case "on" y "off"
 				case "toggle":
 					if (sender instanceof Player) {
 						List<MetadataValue> metas = ((Player) sender).getMetadata(PLAYER_ENABLE_META);
