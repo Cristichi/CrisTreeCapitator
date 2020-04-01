@@ -17,6 +17,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -57,7 +59,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private final String joinMensaje = header + "Remember " + accentColor + "{player}" + textColor + ", you can use "
 			+ accentColor + "/tc toggle" + textColor + " to avoid breaking things made of logs.";
 
-	// Ajustes tiempo de ejecución
+	// Ajustes tiempo de ejecuciï¿½n
 	private static final String PLAYER_ENABLE_META = "cristichi_treecap_meta_disable";
 
 	// Updater
@@ -213,7 +215,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				return destroyed;
 			}
 			World mundo = lego.getWorld();
-			if (lego.breakNaturally()) {
+			ItemStack handItem = player.getInventory().getItemInMainHand();
+			if (lego.breakNaturally(handItem)) {
+				if (tipo.name().contains("LOG")) { takeDamage(handItem, 1); }
+
 				destroyed++;
 			} else
 				return destroyed;
@@ -280,7 +285,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					lego.setType(Material.SPRUCE_SAPLING);
 					break;
 				default:
-					if (lego.breakNaturally()) {
+					ItemStack handItem = player.getInventory().getItemInMainHand();
+					if (lego.breakNaturally(handItem)) {
+						if (tipo.name().contains("LOG")) { takeDamage(handItem, 1); }
+
 						destroyed++;
 					} else
 						return destroyed;
@@ -291,7 +299,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					below.setMetadata(STRG_INVINCIBLE_REPLANT, new FixedMetadataValue(this, true));
 				}
 			} else {
-				if (lego.breakNaturally()) {
+				ItemStack handItem = player.getInventory().getItemInMainHand();
+				if (lego.breakNaturally(handItem)) {
+					if (tipo.name().contains("LOG")) { takeDamage(handItem, 1); }
+
 					destroyed++;
 				} else
 					return destroyed;
@@ -323,6 +334,12 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		}
 
 		return destroyed;
+	}
+
+	private void takeDamage(ItemStack handItem, int i) {
+		Damageable dm = (Damageable) handItem.getItemMeta();
+		dm.setDamage(dm.getDamage() + 1);
+		handItem.setItemMeta((ItemMeta) dm);
 	}
 
 	@Override
@@ -373,7 +390,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							+ (axeNeeded ? "enabled" : "disabled"));
 					break;
 
-				// Añadir case "on" y "off"
+				// Aï¿½adir case "on" y "off"
 				case "toggle":
 					if (sender instanceof Player) {
 						List<MetadataValue> metas = ((Player) sender).getMetadata(PLAYER_ENABLE_META);
