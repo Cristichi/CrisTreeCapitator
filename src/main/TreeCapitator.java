@@ -215,9 +215,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				return destroyed;
 			}
 			World mundo = lego.getWorld();
-			ItemStack handItem = player.getInventory().getItemInMainHand();
-			if (lego.breakNaturally(handItem)) {
-				if (tipo.name().contains("LOG")) { takeDamage(handItem, 1); }
+			if (lego.breakNaturally()) {
+				if (tipo.name().contains("LOG")) { takeDamage(player, 1); }
 
 				destroyed++;
 			} else
@@ -285,9 +284,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					lego.setType(Material.SPRUCE_SAPLING);
 					break;
 				default:
-					ItemStack handItem = player.getInventory().getItemInMainHand();
-					if (lego.breakNaturally(handItem)) {
-						if (tipo.name().contains("LOG")) { takeDamage(handItem, 1); }
+					if (lego.breakNaturally()) {
+						if (tipo.name().contains("LOG")) { takeDamage(player, 1); }
 
 						destroyed++;
 					} else
@@ -299,9 +297,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					below.setMetadata(STRG_INVINCIBLE_REPLANT, new FixedMetadataValue(this, true));
 				}
 			} else {
-				ItemStack handItem = player.getInventory().getItemInMainHand();
-				if (lego.breakNaturally(handItem)) {
-					if (tipo.name().contains("LOG")) { takeDamage(handItem, 1); }
+				if (lego.breakNaturally()) {
+					if (tipo.name().contains("LOG")) { takeDamage(player, 1); }
 
 					destroyed++;
 				} else
@@ -336,10 +333,26 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		return destroyed;
 	}
 
-	private void takeDamage(ItemStack handItem, int i) {
+	private void takeDamage(Player player, int i) {
+		if (!axeNeeded) { return; }
+
+		ItemStack handItem = player.getInventory().getItemInMainHand();
+		if (!handItem.getType().name().contains("_AXE")) {
+			return;
+		}
+
+		if(handItem.getItemMeta() != null && handItem.getItemMeta().isUnbreakable()) {
+			return;
+		}
+
 		Damageable dm = (Damageable) handItem.getItemMeta();
-		dm.setDamage(dm.getDamage() + 1);
-		handItem.setItemMeta((ItemMeta) dm);
+		int newDamage = Math.min(dm.getDamage() + i, handItem.getType().getMaxDurability());
+		if (newDamage == ((int) handItem.getType().getMaxDurability())) {
+			player.getInventory().remove(handItem);
+		}else{
+			dm.setDamage(newDamage);
+			handItem.setItemMeta((ItemMeta) dm);
+		}
 	}
 
 	@Override
