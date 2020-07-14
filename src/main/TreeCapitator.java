@@ -384,7 +384,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 									+ "Sets if an axe is needed for the plugin to act (in that case, it's damaged).",
 							accentColor + "/" + label + " toggle <true/false>: " + textColor
 									+ "Toggles the plugin to work on you.",
-							accentColor + "/" + label + " nethertrees <true/false>: " + textColor
+							accentColor + "/" + label + " setnethertrees <true/false>: " + textColor
 									+ "Sets if nether trees can be cut down at once or not." });
 
 					break;
@@ -619,8 +619,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 					break;
 
-				case "cutnethertrees":
-				case "cutdownnethertrees":
+				case "setcutnethertrees":
+				case "setcutdownnethertrees":
+				case "setnethertrees":
 				case "nethertrees":
 					if (sender.hasPermission("cristreecapitator.admin")) {
 						if (args.length != 2) {
