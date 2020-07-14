@@ -368,20 +368,24 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				switch (args[0].toLowerCase()) {
 
 				case "help":
-					sender.sendMessage(header + "Commands:\n" + accentColor + "/" + label + " help: " + textColor
-							+ "Shows this help message.\n" + accentColor + "/" + label + " update: " + textColor
-							+ "Updates the plugin if there is a new version.\n" + accentColor + "/" + label
-							+ " setLimit <number>: " + textColor
-							+ "Sets the block limit to break each time. Negative number for unlimited.\n" + accentColor
-							+ "/" + label + " vipMode <true/false>: " + textColor
-							+ "Enables or disables Vip Mode (if cristreecapitator.vip is needed to take down trees at once)\n"
-							+ accentColor + "/" + label + " setReplant <true/false>: " + textColor
-							+ "Enables autoreplanting.\n" + accentColor + "/" + label
-							+ " setInvincibleReplanting <true/false>: " + textColor
-							+ "Replanted saplings are invincible. Ignored if replanting is not enabled.\n" + accentColor
-							+ "/" + label + " setAxeNeeded <true/false>: " + textColor
-							+ "Sets if an axe is needed for the plugin to act.\n" + accentColor + "/" + label
-							+ " toggle <true/false>: " + textColor + "Toggles the plugin to work on you.");
+					sender.sendMessage(new String[] { header + "Commands:\n",
+							accentColor + "/" + label + " help: " + textColor + "Shows this help message.",
+							accentColor + "/" + label + " update: " + textColor
+									+ "Updates the plugin if there is a new version.",
+							accentColor + "/" + label + " setLimit <number>: " + textColor
+									+ "Sets the block limit to break each time. Negative number for unlimited.",
+							accentColor + "/" + label + " vipMode <true/false>: " + textColor
+									+ "Enables or disables Vip Mode (if cristreecapitator.vip is needed to take down trees at once)",
+							accentColor + "/" + label + " setReplant <true/false>: " + textColor
+									+ "Enables autoreplanting.",
+							accentColor + "/" + label + " setInvincibleReplanting <true/false>: " + textColor
+									+ "Replanted saplings are invincible. Ignored if replanting is not enabled.",
+							accentColor + "/" + label + " setAxeNeeded <true/false>: " + textColor
+									+ "Sets if an axe is needed for the plugin to act (in that case, it's damaged).",
+							accentColor + "/" + label + " toggle <true/false>: " + textColor
+									+ "Toggles the plugin to work on you.",
+							accentColor + "/" + label + " nethertrees <true/false>: " + textColor
+									+ "Sets if nether trees can be cut down at once or not." });
 
 					break;
 
@@ -603,6 +607,48 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 								config.saveConfig();
 								sender.sendMessage(header + (axeNeeded ? "Axe " + accentColor + "needed"
 										: "Axe " + accentColor + "not needed"));
+							} catch (IOException e) {
+								sender.sendMessage(header + errorColor
+										+ "Error trying to save the value in the configuration file.");
+								e.printStackTrace();
+							}
+						}
+					} else {
+						sinPermiso = true;
+					}
+
+					break;
+
+				case "cutnethertrees":
+				case "cutdownnethertrees":
+				case "nethertrees":
+					if (sender.hasPermission("cristreecapitator.admin")) {
+						if (args.length != 2) {
+							sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+									+ " <true/false/yes/no>" + textColor + ".");
+						} else {
+							switch (args[1]) {
+							case "true":
+							case "yes":
+								admitNetherTrees = true;
+								break;
+							case "false":
+							case "no":
+								admitNetherTrees = false;
+								break;
+
+							default:
+								sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+										+ " <true/false/yes/no>" + textColor + ". (" + accentColor + args[1] + textColor
+										+ " is not a valid argument)");
+								break;
+							}
+							config.setValue(STRG_ADMIT_NETHER_TREES, admitNetherTrees);
+							try {
+								config.saveConfig();
+								sender.sendMessage(
+										header + (admitNetherTrees ? "Cut down nether trees " + accentColor + "true"
+												: "Cut down nether trees " + accentColor + "false"));
 							} catch (IOException e) {
 								sender.sendMessage(header + errorColor
 										+ "Error trying to save the value in the configuration file.");
