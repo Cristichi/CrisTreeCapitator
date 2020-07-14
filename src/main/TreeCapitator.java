@@ -742,7 +742,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private boolean isLeaves(Material mat) {
 		boolean ret = mat.name().contains("LEAVES");
 		if (!ret && admitNetherTrees)
-			return ret || mat.name().equals("NETHER_WART_BLOCK") || mat.name().equals("WARPED_WART_BLOCK");
+			return ret || mat.name().equals("NETHER_WART_BLOCK") || mat.name().equals("WARPED_WART_BLOCK")|| mat.name().equals("SHROOMLIGHT");
 		return ret;
 	}
 }
