@@ -36,7 +36,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	// Colors
 	private final ChatColor mainColor = ChatColor.BLUE;
 	private final ChatColor textColor = ChatColor.AQUA;
-	private final ChatColor accentColor = ChatColor.DARK_AQUA;
+	private final ChatColor accentColor = ChatColor.GOLD;
 	private final ChatColor errorColor = ChatColor.DARK_RED;
 	private final String header = mainColor + "[" + desc.getName() + "] " + textColor;
 
