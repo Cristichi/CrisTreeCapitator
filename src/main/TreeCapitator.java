@@ -6,6 +6,7 @@ import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
@@ -17,6 +18,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -30,17 +33,17 @@ import updater.Updater;
 public class TreeCapitator extends JavaPlugin implements Listener {
 	private PluginDescriptionFile desc = getDescription();
 
-	// Colores
+	// Colors
 	private final ChatColor mainColor = ChatColor.BLUE;
 	private final ChatColor textColor = ChatColor.AQUA;
 	private final ChatColor accentColor = ChatColor.DARK_AQUA;
 	private final ChatColor errorColor = ChatColor.DARK_RED;
 	private final String header = mainColor + "[" + desc.getName() + "] " + textColor;
 
-	// Dependencias
+	// (Soft)Dependencies
 	private WorldGuardPlugin wg;
 
-	// Ajustes
+	// Options
 	private Configuration config;
 	private static final String STRG_MAX_BLOCKS = "destroy limit";
 	private int maxBlocks = -1;
@@ -52,12 +55,14 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private boolean replant = true;
 	private static final String STRG_INVINCIBLE_REPLANT = "invincible replant";
 	private boolean invincibleReplant = false;
+	private static final String STRG_ADMIT_NETHER_TREES = "cut nether \"trees\"";
+	private boolean admitNetherTrees = false;
 
-	// Mensajes
+	// Messages
 	private final String joinMensaje = header + "Remember " + accentColor + "{player}" + textColor + ", you can use "
 			+ accentColor + "/tc toggle" + textColor + " to avoid breaking things made of logs.";
 
-	// Ajustes tiempo de ejecución
+	// Metadata
 	private static final String PLAYER_ENABLE_META = "cristichi_treecap_meta_disable";
 
 	// Updater
@@ -115,6 +120,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		invincibleReplant = config.getBoolean(STRG_INVINCIBLE_REPLANT, invincibleReplant);
 		config.setInfo(STRG_INVINCIBLE_REPLANT,
 				"Sets if saplings replanted by this plugin whould be unbreakable (the block behind too).");
+
+		admitNetherTrees = config.getBoolean(STRG_ADMIT_NETHER_TREES, admitNetherTrees);
+		config.setInfo(STRG_ADMIT_NETHER_TREES,
+				"Sets if the new 1.16 trees should be cut down as well (does nothing in prior versions).");
 	}
 
 	private void saveConfiguration() {
@@ -124,6 +133,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			config.setValue(STRG_AXE_NEEDED, axeNeeded);
 			config.setValue(STRG_REPLANT, replant);
 			config.setValue(STRG_INVINCIBLE_REPLANT, invincibleReplant);
+			config.setValue(STRG_ADMIT_NETHER_TREES, admitNetherTrees);
 			config.saveConfig();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -144,8 +154,13 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	@EventHandler
 	private void onBlockBreak(BlockBreakEvent e) {
 		final Block primero = e.getBlock();
-		final Material tipo = primero.getBlockData().getMaterial();
+		final Material material = primero.getBlockData().getMaterial();
 		final Player player = e.getPlayer();
+		ItemStack tool = player.getInventory().getItemInMainHand();
+		if (!tool.getType().name().contains("_AXE")) {
+			tool = null;
+		}
+
 		if (wg != null && !wg.createProtectionQuery().testBlockBreak(player, primero))
 			return;
 
@@ -157,21 +172,21 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			}
 
 			if (enabled && !e.isCancelled() && (vipMode && player.hasPermission("cristreecapitator.vip") || !vipMode)
-					&& (tipo.name().contains("LOG") /* || tipo.name().contains("LEAVES") */)) {
+					&& (isLog(material))) {
 				try {
 					boolean cutDown = true;
 					if (axeNeeded) {
 						PlayerInventory inv = player.getInventory();
-						ItemStack mano = inv.getItemInMainHand();
-						if (!mano.getType().name().contains("_AXE")) {
+						ItemStack hand = inv.getItemInMainHand();
+						if (!hand.getType().name().contains("_AXE")) {
 							cutDown = false;
 						}
 					}
 					if (cutDown) {
 						if (replant) {
-							breakRecReplant(player, primero, tipo, 0);
+							breakRecReplant(player, tool, primero, material, 0, false);
 						} else {
-							breakRecNoReplant(player, primero, tipo, 0);
+							breakRecNoReplant(player, tool, primero, material, 0, false);
 						}
 						e.setCancelled(true);
 					}
@@ -204,55 +219,59 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	}
 
-	private int breakRecNoReplant(Player player, Block lego, Material type, int destroyed) {
-		if (wg != null && !wg.createProtectionQuery().testBlockBreak(player, lego))
+	private int breakRecNoReplant(Player player, ItemStack tool, Block lego, Material type, int destroyed,
+			boolean stop) {
+		if ((wg != null && !wg.createProtectionQuery().testBlockBreak(player, lego)) || stop)
 			return destroyed;
-		Material tipo = lego.getBlockData().getMaterial();
-		if (tipo.name().contains("LOG") || tipo.name().contains("LEAVES")) {
+		Material material = lego.getBlockData().getMaterial();
+		if (isLog(material) || isLeaves(material)) {
 			if (destroyed > maxBlocks && maxBlocks > 0) {
 				return destroyed;
 			}
 			World mundo = lego.getWorld();
 			if (lego.breakNaturally()) {
 				destroyed++;
+				if (damageItem(player, tool)) {
+					stop = true;
+				}
 			} else
 				return destroyed;
 
 			int x = lego.getX(), y = lego.getY(), z = lego.getZ();
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x, y - 1, z), type, destroyed);
+				destroyed = breakRecNoReplant(player, tool, mundo.getBlockAt(x, y - 1, z), type, destroyed, stop);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x, y + 1, z), type, destroyed);
+				destroyed = breakRecNoReplant(player, tool, mundo.getBlockAt(x, y + 1, z), type, destroyed, stop);
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x + 1, y, z + 1), type, destroyed);
+				destroyed = breakRecNoReplant(player, tool, mundo.getBlockAt(x + 1, y, z + 1), type, destroyed, stop);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x + 1, y, z - 1), type, destroyed);
+				destroyed = breakRecNoReplant(player, tool, mundo.getBlockAt(x + 1, y, z - 1), type, destroyed, stop);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x - 1, y, z + 1), type, destroyed);
+				destroyed = breakRecNoReplant(player, tool, mundo.getBlockAt(x - 1, y, z + 1), type, destroyed, stop);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x - 1, y, z - 1), type, destroyed);
+				destroyed = breakRecNoReplant(player, tool, mundo.getBlockAt(x - 1, y, z - 1), type, destroyed, stop);
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x + 1, y, z), type, destroyed);
+				destroyed = breakRecNoReplant(player, tool, mundo.getBlockAt(x + 1, y, z), type, destroyed, stop);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x, y, z + 1), type, destroyed);
+				destroyed = breakRecNoReplant(player, tool, mundo.getBlockAt(x, y, z + 1), type, destroyed, stop);
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x - 1, y, z), type, destroyed);
+				destroyed = breakRecNoReplant(player, tool, mundo.getBlockAt(x - 1, y, z), type, destroyed, stop);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecNoReplant(player, mundo.getBlockAt(x, y, z - 1), type, destroyed);
+				destroyed = breakRecNoReplant(player, tool, mundo.getBlockAt(x, y, z - 1), type, destroyed, stop);
 		}
 
 		return destroyed;
 	}
 
-	private int breakRecReplant(Player player, Block lego, Material type, int destroyed) {
-		if (wg != null && !wg.createProtectionQuery().testBlockBreak(player, lego))
+	private int breakRecReplant(Player player, ItemStack tool, Block lego, Material type, int destroyed, boolean stop) {
+		if ((wg != null && !wg.createProtectionQuery().testBlockBreak(player, lego)) || stop)
 			return destroyed;
-		Material tipo = lego.getBlockData().getMaterial();
-		if (tipo.name().contains("LOG") || tipo.name().contains("LEAVES")) {
+		Material material = lego.getBlockData().getMaterial();
+		if (isLog(material) || isLeaves(material)) {
 			if (maxBlocks > 0 && destroyed > maxBlocks) {
 				return destroyed;
 			}
@@ -282,6 +301,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				default:
 					if (lego.breakNaturally()) {
 						destroyed++;
+						if (damageItem(player, tool)) {
+							stop = true;
+						}
 					} else
 						return destroyed;
 					break;
@@ -293,33 +315,36 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			} else {
 				if (lego.breakNaturally()) {
 					destroyed++;
+					if (damageItem(player, tool)) {
+						stop = true;
+					}
 				} else
 					return destroyed;
 			}
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(player, mundo.getBlockAt(x, y - 1, z), type, destroyed);
+				destroyed = breakRecReplant(player, tool, mundo.getBlockAt(x, y - 1, z), type, destroyed, stop);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(player, mundo.getBlockAt(x, y + 1, z), type, destroyed);
+				destroyed = breakRecReplant(player, tool, mundo.getBlockAt(x, y + 1, z), type, destroyed, stop);
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(player, mundo.getBlockAt(x + 1, y, z + 1), type, destroyed);
+				destroyed = breakRecReplant(player, tool, mundo.getBlockAt(x + 1, y, z + 1), type, destroyed, stop);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(player, mundo.getBlockAt(x + 1, y, z - 1), type, destroyed);
+				destroyed = breakRecReplant(player, tool, mundo.getBlockAt(x + 1, y, z - 1), type, destroyed, stop);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(player, mundo.getBlockAt(x - 1, y, z + 1), type, destroyed);
+				destroyed = breakRecReplant(player, tool, mundo.getBlockAt(x - 1, y, z + 1), type, destroyed, stop);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(player, mundo.getBlockAt(x - 1, y, z - 1), type, destroyed);
+				destroyed = breakRecReplant(player, tool, mundo.getBlockAt(x - 1, y, z - 1), type, destroyed, stop);
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(player, mundo.getBlockAt(x + 1, y, z), type, destroyed);
+				destroyed = breakRecReplant(player, tool, mundo.getBlockAt(x + 1, y, z), type, destroyed, stop);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(player, mundo.getBlockAt(x, y, z + 1), type, destroyed);
+				destroyed = breakRecReplant(player, tool, mundo.getBlockAt(x, y, z + 1), type, destroyed, stop);
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(player, mundo.getBlockAt(x - 1, y, z), type, destroyed);
+				destroyed = breakRecReplant(player, tool, mundo.getBlockAt(x - 1, y, z), type, destroyed, stop);
 			if (destroyed < maxBlocks || maxBlocks < 0)
-				destroyed = breakRecReplant(player, mundo.getBlockAt(x, y, z - 1), type, destroyed);
+				destroyed = breakRecReplant(player, tool, mundo.getBlockAt(x, y, z - 1), type, destroyed, stop);
 		}
 
 		return destroyed;
@@ -373,7 +398,6 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							+ (axeNeeded ? "enabled" : "disabled"));
 					break;
 
-				// Añadir case "on" y "off"
 				case "toggle":
 					if (sender instanceof Player) {
 						List<MetadataValue> metas = ((Player) sender).getMetadata(PLAYER_ENABLE_META);
@@ -632,5 +656,47 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			sender.sendMessage(header + errorColor + "You don't have permission to use this command.");
 		}
 		return bueno;
+	}
+
+	/**
+	 * Deals 1 damage to an item, if possible
+	 * 
+	 * @param player
+	 * @param tool
+	 * @return true if item is destroyed, false if not damageable or damaged but not
+	 *         destroyed
+	 */
+	private boolean damageItem(Player player, ItemStack tool) {
+		if (axeNeeded && tool != null) {
+			ItemMeta meta = tool.getItemMeta();
+			if (meta instanceof Damageable) {
+				short maxDmg = tool.getType().getMaxDurability();
+				Damageable damageable = (Damageable) meta;
+				int dmg = damageable.getDamage();
+				damageable.setDamage(++dmg);
+				tool.setItemMeta((ItemMeta) damageable);
+
+				if (dmg >= maxDmg) {
+					tool.setAmount(0);
+					player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1, 1);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean isLog(Material mat) {
+		boolean ret = mat.name().contains("LOG");
+		if (!ret && admitNetherTrees)
+			return ret || mat.name().equals("CRIMSON_STEM") || mat.name().equals("WARPED_STEM");
+		return ret;
+	}
+
+	private boolean isLeaves(Material mat) {
+		boolean ret = mat.name().contains("LEAVES");
+		if (!ret && admitNetherTrees)
+			return ret || mat.name().equals("NETHER_WART_BLOCK") || mat.name().equals("WARPED_WART_BLOCK");
+		return ret;
 	}
 }
