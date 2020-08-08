@@ -392,6 +392,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "/" + label + " help: " + textColor + "Shows this help message.",
 							accentColor + "/" + label + " update: " + textColor
 							+ "Updates the plugin if there is a new version.",
+							accentColor + "/" + label + " reload: " + textColor
+							+ "Looks for changes in the configuration file and applies them.",
 							accentColor + "/" + label + " toggle <true/false>: " + textColor
 							+ "Toggles the plugin to work on you.",
 							accentColor + "/" + label + " values: " + textColor
