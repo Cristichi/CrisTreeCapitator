@@ -407,7 +407,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "/" + label + " setDamageAxe <true/false>: " + textColor
 									+ "Sets if, in case an axe is needed, it should be damage.",
 							accentColor + "/" + label + " setBreakAxes <true/false>: " + textColor
-									+ "Sets if, in case an axe is needed and damaged, it should never be broken.",
+									+ "Sets if, in case an axe is needed and damaged, it should never be broken (when used on logs, not leaves).",
 							accentColor + "/" + label + " toggle <true/false>: " + textColor
 									+ "Toggles the plugin to work on you.",
 							accentColor + "/" + label + " setnethertrees <true/false>: " + textColor
