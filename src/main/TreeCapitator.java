@@ -392,6 +392,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "/" + label + " help: " + textColor + "Shows this help message.",
 							accentColor + "/" + label + " update: " + textColor
 							+ "Updates the plugin if there is a new version.",
+							accentColor + "/" + label + " toggle <true/false>: " + textColor
+							+ "Toggles the plugin to work on you.",
 							accentColor + "/" + label + " values: " + textColor
 							+ "Checks the values set in the configuration.",
 							accentColor + "/" + label + " setLimit <number>: " + textColor
@@ -408,8 +410,6 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 									+ "Sets if, in case an axe is needed, it should be damage.",
 							accentColor + "/" + label + " setBreakAxes <true/false>: " + textColor
 									+ "Sets if, in case an axe is needed and damaged, it should never be broken (when used on logs, not leaves).",
-							accentColor + "/" + label + " toggle <true/false>: " + textColor
-									+ "Toggles the plugin to work on you.",
 							accentColor + "/" + label + " setnethertrees <true/false>: " + textColor
 									+ "Sets if nether trees can be cut down at once or not." });
 
