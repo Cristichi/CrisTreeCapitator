@@ -400,7 +400,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							+ "Checks the values set in the configuration.",
 							accentColor + "/" + label + " setLimit <number>: " + textColor
 									+ "Sets the block limit to break each time. Negative number for unlimited.",
-							accentColor + "/" + label + " vipMode <true/false>: " + textColor
+							accentColor + "/" + label + " setVipMode <true/false>: " + textColor
 									+ "Enables or disables Vip Mode (if cristreecapitator.vip is needed to take down trees at once)",
 							accentColor + "/" + label + " setReplant <true/false>: " + textColor
 									+ "Enables autoreplanting.",
