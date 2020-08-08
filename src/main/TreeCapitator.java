@@ -51,6 +51,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private boolean vipMode = false;
 	private static final String STRG_AXE_NEEDED = "axe needed";
 	private boolean axeNeeded = true;
+	private static final String STRG_DAMAGE_AXE = "damage axe";
+	private boolean damageAxe = true;
+	private static final String STRG_BREAK_AXE = "break axe";
+	private boolean breakAxe = false;
 	private static final String STRG_REPLANT = "replant";
 	private boolean replant = true;
 	private static final String STRG_INVINCIBLE_REPLANT = "invincible replant";
@@ -114,6 +118,14 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		axeNeeded = config.getBoolean(STRG_AXE_NEEDED, axeNeeded);
 		config.setInfo(STRG_AXE_NEEDED, "Sets if an axe is required to Cut down trees at once.");
 
+		damageAxe = config.getBoolean(STRG_DAMAGE_AXE, damageAxe);
+		config.setInfo(STRG_DAMAGE_AXE,
+				"If " + STRG_AXE_NEEDED + " is set to true, sets if the axe used is damaged or not.");
+
+		breakAxe = config.getBoolean(STRG_BREAK_AXE, damageAxe);
+		config.setInfo(STRG_BREAK_AXE, "If " + STRG_AXE_NEEDED + " and " + STRG_DAMAGE_AXE
+				+ " are set to true, sets if the axe should not be broken.");
+
 		replant = config.getBoolean(STRG_REPLANT, replant);
 		config.setInfo(STRG_REPLANT, "Sets if trees should be replanted automatically.");
 
@@ -131,6 +143,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			config.setValue(STRG_MAX_BLOCKS, maxBlocks);
 			config.setValue(STRG_VIP_MODE, vipMode);
 			config.setValue(STRG_AXE_NEEDED, axeNeeded);
+			config.setValue(STRG_DAMAGE_AXE, damageAxe);
+			config.setValue(STRG_BREAK_AXE, breakAxe);
 			config.setValue(STRG_REPLANT, replant);
 			config.setValue(STRG_INVINCIBLE_REPLANT, invincibleReplant);
 			config.setValue(STRG_ADMIT_NETHER_TREES, admitNetherTrees);
@@ -229,13 +243,15 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				return destroyed;
 			}
 			World mundo = lego.getWorld();
-			if (lego.breakNaturally()) {
-				destroyed++;
-				if (damageItem(player, tool)) {
-					stop = true;
+			if (damageItem(player, tool, material)) {
+				stop = true;
+			} else {
+				if (lego.breakNaturally()) {
+					destroyed++;
+				} else {
+					return destroyed;
 				}
-			} else
-				return destroyed;
+			}
 
 			int x = lego.getX(), y = lego.getY(), z = lego.getZ();
 
@@ -299,13 +315,15 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					lego.setType(Material.SPRUCE_SAPLING);
 					break;
 				default:
-					if (lego.breakNaturally()) {
-						destroyed++;
-						if (damageItem(player, tool)) {
-							stop = true;
-						}
-					} else
+					if (damageItem(player, tool, material)) {
 						return destroyed;
+					} else {
+						if (lego.breakNaturally()) {
+							destroyed++;
+						} else {
+							return destroyed;
+						}
+					}
 					break;
 				}
 				if (replant) {
@@ -313,13 +331,15 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					below.setMetadata(STRG_INVINCIBLE_REPLANT, new FixedMetadataValue(this, true));
 				}
 			} else {
-				if (lego.breakNaturally()) {
-					destroyed++;
-					if (damageItem(player, tool)) {
-						stop = true;
+				if (damageItem(player, tool, material)) {
+					stop = true;
+				} else {
+					if (lego.breakNaturally()) {
+						destroyed++;
+					} else {
+						return destroyed;
 					}
-				} else
-					return destroyed;
+				}
 			}
 
 			if (destroyed < maxBlocks || maxBlocks < 0)
@@ -371,7 +391,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					sender.sendMessage(new String[] { header + "Commands:\n",
 							accentColor + "/" + label + " help: " + textColor + "Shows this help message.",
 							accentColor + "/" + label + " update: " + textColor
-									+ "Updates the plugin if there is a new version.",
+							+ "Updates the plugin if there is a new version.",
+							accentColor + "/" + label + " values: " + textColor
+							+ "Checks the values set in the configuration.",
 							accentColor + "/" + label + " setLimit <number>: " + textColor
 									+ "Sets the block limit to break each time. Negative number for unlimited.",
 							accentColor + "/" + label + " vipMode <true/false>: " + textColor
@@ -381,7 +403,11 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "/" + label + " setInvincibleReplanting <true/false>: " + textColor
 									+ "Replanted saplings are invincible. Ignored if replanting is not enabled.",
 							accentColor + "/" + label + " setAxeNeeded <true/false>: " + textColor
-									+ "Sets if an axe is needed for the plugin to act (in that case, it's damaged).",
+									+ "Sets if an axe is needed for the plugin to act.",
+							accentColor + "/" + label + " setDamageAxe <true/false>: " + textColor
+									+ "Sets if, in case an axe is needed, it should be damage.",
+							accentColor + "/" + label + " setBreakAxes <true/false>: " + textColor
+									+ "Sets if, in case an axe is needed and damaged, it should never be broken.",
 							accentColor + "/" + label + " toggle <true/false>: " + textColor
 									+ "Toggles the plugin to work on you.",
 							accentColor + "/" + label + " setnethertrees <true/false>: " + textColor
@@ -394,12 +420,16 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					break;
 
 				case "values":
-					sender.sendMessage(header + "Values" + accentColor + "\nLimit: " + textColor
-							+ (maxBlocks < 0 ? "unbounded" : maxBlocks) + accentColor + "\nReplant: " + textColor
-							+ (replant ? "enabled" : "disabled") + accentColor + "\nInvincible replant: " + textColor
-							+ (invincibleReplant ? "enabled" : "disabled") + accentColor + "\nVip Mode: " + textColor
-							+ (vipMode ? "enabled" : "disabled") + accentColor + "\nAxe Needed: " + textColor
-							+ (axeNeeded ? "enabled" : "disabled"));
+					sender.sendMessage(new String[] { header + "Values:",
+							accentColor + "Limit: " + textColor + (maxBlocks < 0 ? "unbounded" : maxBlocks),
+							accentColor + "Replant: " + textColor + (replant ? "enabled" : "disabled"),
+							accentColor + "Invincible replant: " + textColor
+									+ (invincibleReplant ? "enabled" : "disabled"),
+							accentColor + "Vip Mode: " + textColor + (vipMode ? "enabled" : "disabled"),
+							accentColor + "Axe Needed: " + textColor + (axeNeeded ? "enabled" : "disabled"),
+							accentColor + "Axe Damaged: " + textColor + (axeNeeded ? "enabled" : "disabled"),
+							accentColor + "Damage Axe: " + textColor + (damageAxe ? "enabled" : "disabled"),
+							accentColor + "Break Axe: " + textColor + (breakAxe ? "enabled" : "disabled"), });
 					break;
 
 				case "toggle":
@@ -578,7 +608,6 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 					break;
 
-				case "setaxe":
 				case "axeneeded":
 				case "setaxeneeded":
 					if (sender.hasPermission("cristreecapitator.admin")) {
@@ -607,6 +636,92 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 								config.saveConfig();
 								sender.sendMessage(header + (axeNeeded ? "Axe " + accentColor + "needed"
 										: "Axe " + accentColor + "not needed"));
+							} catch (IOException e) {
+								sender.sendMessage(header + errorColor
+										+ "Error trying to save the value in the configuration file.");
+								e.printStackTrace();
+							}
+						}
+					} else {
+						sinPermiso = true;
+					}
+
+					break;
+
+				case "setdamage":
+				case "setdamageaxe":
+				case "setaxedamage":
+				case "damageaxe":
+				case "axedamage":
+					if (sender.hasPermission("cristreecapitator.admin")) {
+						if (args.length != 2) {
+							sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+									+ " <true/false/yes/no>" + textColor + ".");
+						} else {
+							switch (args[1]) {
+							case "true":
+							case "yes":
+								damageAxe = true;
+								break;
+							case "false":
+							case "no":
+								damageAxe = false;
+								break;
+
+							default:
+								sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+										+ " <true/false/yes/no>" + textColor + ". (" + accentColor + args[1] + textColor
+										+ " is not a valid argument)");
+								break;
+							}
+							config.setValue(STRG_DAMAGE_AXE, damageAxe);
+							try {
+								config.saveConfig();
+								sender.sendMessage(header + (damageAxe ? "Axes " + accentColor + "can be damaged"
+										: "Axes " + accentColor + "can't be damaged"));
+							} catch (IOException e) {
+								sender.sendMessage(header + errorColor
+										+ "Error trying to save the value in the configuration file.");
+								e.printStackTrace();
+							}
+						}
+					} else {
+						sinPermiso = true;
+					}
+
+					break;
+
+				case "setbreak":
+				case "setbreakaxe":
+				case "setaxebreak":
+				case "breakaxe":
+				case "axebreak":
+					if (sender.hasPermission("cristreecapitator.admin")) {
+						if (args.length != 2) {
+							sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+									+ " <true/false/yes/no>" + textColor + ".");
+						} else {
+							switch (args[1]) {
+							case "true":
+							case "yes":
+								breakAxe = true;
+								break;
+							case "false":
+							case "no":
+								breakAxe = false;
+								break;
+
+							default:
+								sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+										+ " <true/false/yes/no>" + textColor + ". (" + accentColor + args[1] + textColor
+										+ " is not a valid argument)");
+								break;
+							}
+							config.setValue(STRG_BREAK_AXE, breakAxe);
+							try {
+								config.saveConfig();
+								sender.sendMessage(header + (breakAxe ? "Axes " + accentColor + "can be broken"
+										: "Axes " + accentColor + "can't be broken"));
 							} catch (IOException e) {
 								sender.sendMessage(header + errorColor
 										+ "Error trying to save the value in the configuration file.");
@@ -710,11 +825,11 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	 * 
 	 * @param player
 	 * @param tool
-	 * @return true if item is destroyed, false if not damageable or damaged but not
-	 *         destroyed
+	 * @return true if item is destroyed or should not be damaged anymore, false if
+	 *         not damageable or damaged but not destroyed
 	 */
-	private boolean damageItem(Player player, ItemStack tool) {
-		if (axeNeeded && tool != null) {
+	private boolean damageItem(Player player, ItemStack tool, Material material) {
+		if (axeNeeded && damageAxe && tool != null && isLog(material)) {
 			ItemMeta meta = tool.getItemMeta();
 			if (meta instanceof Damageable) {
 				short maxDmg = tool.getType().getMaxDurability();
@@ -724,8 +839,14 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				tool.setItemMeta((ItemMeta) damageable);
 
 				if (dmg >= maxDmg) {
-					tool.setAmount(0);
-					player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1, 1);
+					if (breakAxe) {
+						player.sendMessage(header+"breakAxe: "+breakAxe);
+						tool.setAmount(0);
+						player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1, 1);
+					} else {
+						damageable.setDamage(maxDmg - 1);
+						tool.setItemMeta((ItemMeta) damageable);
+					}
 					return true;
 				}
 			}
@@ -743,7 +864,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private boolean isLeaves(Material mat) {
 		boolean ret = mat.name().contains("LEAVES");
 		if (!ret && admitNetherTrees)
-			return ret || mat.name().equals("NETHER_WART_BLOCK") || mat.name().equals("WARPED_WART_BLOCK")|| mat.name().equals("SHROOMLIGHT");
+			return ret || mat.name().equals("NETHER_WART_BLOCK") || mat.name().equals("WARPED_WART_BLOCK")
+					|| mat.name().equals("SHROOMLIGHT");
 		return ret;
 	}
 }
