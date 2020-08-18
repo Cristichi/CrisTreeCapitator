@@ -141,7 +141,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 		startActivated = config.getBoolean(STRG_START_ACTIVATED, startActivated);
 		config.setInfo(STRG_START_ACTIVATED,
-				"Sets if plugin is activated by default. If false, players will need to use /tc toggle).");
+				"Sets if plugin is activated by default. If false, players will need to use /tc toggle to activate it for themself.");
 	}
 
 	private void saveConfiguration() {
