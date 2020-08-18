@@ -61,6 +61,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private boolean invincibleReplant = false;
 	private static final String STRG_ADMIT_NETHER_TREES = "cut nether \"trees\"";
 	private boolean admitNetherTrees = false;
+	private static final String STRG_START_ACTIVATED = "start activated";
+	private boolean startActivated = true;
 
 	// Messages
 	private final String joinMensaje = header + "Remember " + accentColor + "{player}" + textColor + ", you can use "
@@ -132,10 +134,14 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		invincibleReplant = config.getBoolean(STRG_INVINCIBLE_REPLANT, invincibleReplant);
 		config.setInfo(STRG_INVINCIBLE_REPLANT,
 				"Sets if saplings replanted by this plugin whould be unbreakable (the block behind too).");
-
+		
 		admitNetherTrees = config.getBoolean(STRG_ADMIT_NETHER_TREES, admitNetherTrees);
 		config.setInfo(STRG_ADMIT_NETHER_TREES,
 				"Sets if the new 1.16 trees should be cut down as well (does nothing in prior versions).");
+
+		startActivated = config.getBoolean(STRG_START_ACTIVATED, startActivated);
+		config.setInfo(STRG_START_ACTIVATED,
+				"Sets if plugin is activated by default. If false, players will need to use /tc toggle).");
 	}
 
 	private void saveConfiguration() {
@@ -148,6 +154,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			config.setValue(STRG_REPLANT, replant);
 			config.setValue(STRG_INVINCIBLE_REPLANT, invincibleReplant);
 			config.setValue(STRG_ADMIT_NETHER_TREES, admitNetherTrees);
+			config.setValue(STRG_START_ACTIVATED, startActivated);
 			config.saveConfig();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -179,7 +186,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			return;
 
 		if (player.getGameMode().equals(GameMode.SURVIVAL)) {
-			boolean enabled = true;
+			boolean enabled = startActivated;
 			List<MetadataValue> metas = player.getMetadata(PLAYER_ENABLE_META);
 			for (MetadataValue meta : metas) {
 				enabled = meta.asBoolean();
