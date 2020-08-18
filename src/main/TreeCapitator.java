@@ -446,15 +446,14 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 						List<MetadataValue> metas = ((Player) sender).getMetadata(PLAYER_ENABLE_META);
 						if (metas.isEmpty()) {
 							((Player) sender).setMetadata(PLAYER_ENABLE_META, new FixedMetadataValue(this, false));
-							sender.sendMessage(header + "Cristichi's Tree Capitator is disabled for you now. Use /"
-									+ label + " toggle again to enable it.");
-						}
-						for (MetadataValue meta : metas) {
-							boolean este = !meta.asBoolean();
-							((Player) sender).setMetadata(PLAYER_ENABLE_META, new FixedMetadataValue(this, este));
-							sender.sendMessage(header + "Cristichi's Tree Capitator is "
-									+ (meta.asBoolean() ? "disabled" : "enabled") + " for you.");
-						}
+							sender.sendMessage(header + "Cristichi's Tree Capitator is now "+ (startActivated ? "enabled" : "disabled") +" for you.");
+						}else 
+							for (MetadataValue meta : metas) {
+								boolean este = !meta.asBoolean();
+								((Player) sender).setMetadata(PLAYER_ENABLE_META, new FixedMetadataValue(this, este));
+								sender.sendMessage(header + "Cristichi's Tree Capitator is now "
+										+ (meta.asBoolean() ? "disabled" : "enabled") + " for you.");
+							}
 					} else {
 						sender.sendMessage(header + "This plugin can only be used for players");
 					}
