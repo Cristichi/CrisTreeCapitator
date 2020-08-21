@@ -438,16 +438,16 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 				case "values":
 					sender.sendMessage(new String[] { header + "Values:",
+							accentColor + "Starts Activated: " + textColor + (startActivated ? "true" : "false"),
 							accentColor + "Limit: " + textColor + (maxBlocks < 0 ? "unbounded" : maxBlocks),
+							accentColor + "Vip Mode: " + textColor + (vipMode ? "enabled" : "disabled"),
 							accentColor + "Replant: " + textColor + (replant ? "enabled" : "disabled"),
 							accentColor + "Invincible replant: " + textColor
 									+ (invincibleReplant ? "enabled" : "disabled"),
-							accentColor + "Vip Mode: " + textColor + (vipMode ? "enabled" : "disabled"),
 							accentColor + "Axe Needed: " + textColor + (axeNeeded ? "true" : "false"),
 							accentColor + "Axe Damaged: " + textColor + (axeNeeded ? "true" : "false"),
 							accentColor + "Damage Axe: " + textColor + (damageAxe ? "enabled" : "disabled"),
 							accentColor + "Break Axe: " + textColor + (breakAxe ? "enabled" : "disabled"),
-							accentColor + "Starts Activated: " + textColor + (startActivated ? "true" : "false"),
 							});
 					break;
 
