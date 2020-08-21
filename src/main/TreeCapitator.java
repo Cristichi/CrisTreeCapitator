@@ -65,8 +65,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private boolean startActivated = true;
 
 	// Messages
-	private final String joinMensaje = header + "Remember " + accentColor + "{player}" + textColor + ", you can use "
-			+ accentColor + "/tc toggle" + textColor + " to avoid breaking things made of logs.";
+	private final String joinMensajeActivated = header + "Remember " + accentColor + "{player}" + textColor + ", you can use " + accentColor + "/tc toggle" + textColor + " to avoid breaking things made of logs.";
+	private final String joinMensajeDeactivated = header + "Remember " + accentColor + "{player}" + textColor + ", you can use " + accentColor + "/tc toggle" + textColor + " to cut down trees faster.";
 
 	// Metadata
 	private static final String PLAYER_ENABLE_META = "cristichi_treecap_meta_disable";
@@ -169,7 +169,15 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
-		p.sendMessage(joinMensaje.replace("{player}", p.getDisplayName()));
+		boolean enabled = startActivated;
+		List<MetadataValue> metas = p.getMetadata(PLAYER_ENABLE_META);
+		for (MetadataValue meta : metas) {
+			enabled = meta.asBoolean();
+		}
+		if (enabled)
+			p.sendMessage(joinMensajeActivated.replace("{player}", p.getDisplayName()));
+		else
+			p.sendMessage(joinMensajeDeactivated.replace("{player}", p.getDisplayName()));
 	}
 
 	@EventHandler
@@ -435,10 +443,12 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "Invincible replant: " + textColor
 									+ (invincibleReplant ? "enabled" : "disabled"),
 							accentColor + "Vip Mode: " + textColor + (vipMode ? "enabled" : "disabled"),
-							accentColor + "Axe Needed: " + textColor + (axeNeeded ? "enabled" : "disabled"),
-							accentColor + "Axe Damaged: " + textColor + (axeNeeded ? "enabled" : "disabled"),
+							accentColor + "Axe Needed: " + textColor + (axeNeeded ? "true" : "false"),
+							accentColor + "Axe Damaged: " + textColor + (axeNeeded ? "true" : "false"),
 							accentColor + "Damage Axe: " + textColor + (damageAxe ? "enabled" : "disabled"),
-							accentColor + "Break Axe: " + textColor + (breakAxe ? "enabled" : "disabled"), });
+							accentColor + "Break Axe: " + textColor + (breakAxe ? "enabled" : "disabled"),
+							accentColor + "Starts Activated: " + textColor + (startActivated ? "true" : "false"),
+							});
 					break;
 
 				case "toggle":
@@ -773,6 +783,48 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 								sender.sendMessage(
 										header + (admitNetherTrees ? "Cut down nether trees " + accentColor + "true"
 												: "Cut down nether trees " + accentColor + "false"));
+							} catch (IOException e) {
+								sender.sendMessage(header + errorColor
+										+ "Error trying to save the value in the configuration file.");
+								e.printStackTrace();
+							}
+						}
+					} else {
+						sinPermiso = true;
+					}
+
+					break;
+
+				case "setstartactivated":
+				case "startactivated":
+				case "preactivated":
+					if (sender.hasPermission("cristreecapitator.admin")) {
+						if (args.length != 2) {
+							sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+									+ " <true/false/yes/no>" + textColor + ".");
+						} else {
+							switch (args[1]) {
+							case "true":
+							case "yes":
+								startActivated = true;
+								break;
+							case "false":
+							case "no":
+								startActivated = false;
+								break;
+
+							default:
+								sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+										+ " <true/false/yes/no>" + textColor + ". (" + accentColor + args[1] + textColor
+										+ " is not a valid argument)");
+								break;
+							}
+							config.setValue(STRG_START_ACTIVATED, startActivated);
+							try {
+								config.saveConfig();
+								sender.sendMessage(
+										header + (startActivated ? "Plugin activated by default " + accentColor + "true"
+												: "Plugin activated by default " + accentColor + "false"));
 							} catch (IOException e) {
 								sender.sendMessage(header + errorColor
 										+ "Error trying to save the value in the configuration file.");
