@@ -174,10 +174,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		for (MetadataValue meta : metas) {
 			enabled = meta.asBoolean();
 		}
-		if (enabled)
-			p.sendMessage(joinMensajeActivated.replace("{player}", p.getDisplayName()));
-		else
-			p.sendMessage(joinMensajeDeactivated.replace("{player}", p.getDisplayName()));
+		
 	}
 
 	@EventHandler
