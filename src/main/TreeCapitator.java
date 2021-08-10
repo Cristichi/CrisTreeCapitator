@@ -122,7 +122,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 		damageAxe = config.getBoolean(STRG_DAMAGE_AXE, damageAxe);
 		config.setInfo(STRG_DAMAGE_AXE,
-				"If " + STRG_AXE_NEEDED + " is set to true, sets if the axe used is damaged or not.");
+				"If " + STRG_AXE_NEEDED + " is set to true, sets if axes used are damaged or not. If " + STRG_AXE_NEEDED + " is false, this option is ignored.");
 
 		breakAxe = config.getBoolean(STRG_BREAK_AXE, damageAxe);
 		config.setInfo(STRG_BREAK_AXE, "If " + STRG_AXE_NEEDED + " and " + STRG_DAMAGE_AXE
@@ -133,15 +133,15 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 		invincibleReplant = config.getBoolean(STRG_INVINCIBLE_REPLANT, invincibleReplant);
 		config.setInfo(STRG_INVINCIBLE_REPLANT,
-				"Sets if saplings replanted by this plugin whould be unbreakable (the block behind too).");
+				"Sets if saplings replanted by this plugin should be unbreakable (including the block beneath).");
 		
 		admitNetherTrees = config.getBoolean(STRG_ADMIT_NETHER_TREES, admitNetherTrees);
 		config.setInfo(STRG_ADMIT_NETHER_TREES,
-				"Sets if the new 1.16 trees should be cut down as well (does nothing in prior versions).");
+				"Sets if the new 1.16 nether trees should be cut down as well (it does nothing in prior versions).");
 
 		startActivated = config.getBoolean(STRG_START_ACTIVATED, startActivated);
 		config.setInfo(STRG_START_ACTIVATED,
-				"Sets if plugin is activated by default. If false, players will need to use /tc toggle to activate it for themself.");
+				"Sets if plugin is activated for player when they enter the server. If false, players will need to use /tc toggle to activate it for themselves.");
 	}
 
 	private void saveConfiguration() {
@@ -309,7 +309,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			World mundo = lego.getWorld();
 			int x = lego.getX(), y = lego.getY(), z = lego.getZ();
 			Block below = mundo.getBlockAt(x, y - 1, z);
-			if (below.getType().equals(Material.DIRT) || below.getType().equals(Material.GRASS_BLOCK)) {
+			if (isDirt(below)) {
 				switch (lego.getType()) {
 				case ACACIA_LOG:
 					lego.setType(Material.ACACIA_SAPLING);
@@ -427,7 +427,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 									+ "Sets if, in case an axe is needed, it should be damage.",
 							accentColor + "/" + label + " setBreakAxes <true/false>: " + textColor
 									+ "Sets if, in case an axe is needed and damaged, it should never be broken (when used on logs, not leaves).",
-							accentColor + "/" + label + " setnethertrees <true/false>: " + textColor
+							accentColor + "/" + label + " setNetherTrees <true/false>: " + textColor
 									+ "Sets if nether trees can be cut down at once or not." });
 
 					break;
@@ -925,5 +925,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			return ret || mat.name().equals("NETHER_WART_BLOCK") || mat.name().equals("WARPED_WART_BLOCK")
 					|| mat.name().equals("SHROOMLIGHT");
 		return ret;
+	}
+
+	private boolean isDirt(Block below) {
+		return below.getType().equals(Material.DIRT) || below.getType().equals(Material.GRASS_BLOCK)|| below.getType().equals(Material.PODZOL);
 	}
 }

@@ -6,7 +6,7 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Todo/MC Servers/craftbukkit-1.16.1.jar" sourcepath="C:/Todo/MC Servers/Bukkit-master.zip"/>
-	<classpathentry kind="lib" path="C:/Todo/MC Servers/worldguard-bukkit-7.0.3.jar"/>
+	<classpathentry kind="lib" path="C:/Todo/MC Plugins/spigot-1.17.1.jar"/>
+	<classpathentry kind="lib" path="C:/Todo/MC Plugins/worldguard-bukkit-7.0.6-beta1-dist.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
