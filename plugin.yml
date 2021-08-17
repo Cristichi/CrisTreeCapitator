@@ -6,7 +6,7 @@ softdepend: [WorldGuard]
 commands:
   tc:
    description: Controls CrisTreeCapitator and gives information.
-   aliases: [treecapitator, treecap]
+   aliases: [treecapitator, treecap, cristc]
    usage: /tc help
    
 permissions:

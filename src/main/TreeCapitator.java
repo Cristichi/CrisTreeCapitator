@@ -1,6 +1,7 @@
 package main;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.ChatColor;
@@ -45,7 +46,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	// Options
 	private Configuration config;
-	
+
 	private static final String STRG_MAX_BLOCKS = "destroy limit";
 	private int maxBlocks = -1;
 	private static final String DESC_MAX_BLOCKS = "Sets the maximun number of logs and leaves that can be destroyed at once. -1 to unlimit.";
@@ -89,7 +90,6 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private boolean joinMsg = true;
 	private static final String DESC_JOIN_MSG = "It enables a message reminding the player about /tc toggle when they join the server. The message changes depending on the value of \""
 			+ STRG_START_ACTIVATED + "\".";
-	//TODO: Configuración sobre romper las hojas.
 
 	// Messages
 	private final String joinMensajeActivated = header + "Remember " + accentColor + "{player}" + textColor
@@ -441,26 +441,19 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 									+ "Toggles the plugin to work or not on you.",
 							accentColor + "/" + label + " values: " + textColor
 									+ "Checks the values set in the configuration.",
-							accentColor + "/" + label + " setLimit <number>: " + textColor
-									+ DESC_MAX_BLOCKS,
-							accentColor + "/" + label + " setVipMode <true/false>: " + textColor
-									+ DESC_VIP_MODE,
-							accentColor + "/" + label + " setReplant <true/false>: " + textColor
-									+ DESC_REPLANT,
+							accentColor + "/" + label + " setLimit <number>: " + textColor + DESC_MAX_BLOCKS,
+							accentColor + "/" + label + " setVipMode <true/false>: " + textColor + DESC_VIP_MODE,
+							accentColor + "/" + label + " setReplant <true/false>: " + textColor + DESC_REPLANT,
 							accentColor + "/" + label + " setInvincibleReplanting <true/false>: " + textColor
 									+ DESC_INVINCIBLE_REPLANT,
-							accentColor + "/" + label + " setAxeNeeded <true/false>: " + textColor
-									+ DESC_AXE_NEEDED,
-							accentColor + "/" + label + " setDamageAxe <true/false>: " + textColor
-									+ DESC_DAMAGE_AXE,
-							accentColor + "/" + label + " setBreakAxes <true/false>: " + textColor
-									+ DESC_BREAK_AXE,
+							accentColor + "/" + label + " setAxeNeeded <true/false>: " + textColor + DESC_AXE_NEEDED,
+							accentColor + "/" + label + " setDamageAxe <true/false>: " + textColor + DESC_DAMAGE_AXE,
+							accentColor + "/" + label + " setBreakAxes <true/false>: " + textColor + DESC_BREAK_AXE,
 							accentColor + "/" + label + " setNetherTrees <true/false>: " + textColor
 									+ DESC_ADMIT_NETHER_TREES,
 							accentColor + "/" + label + " setStartActivated <true/false>: " + textColor
 									+ DESC_START_ACTIVATED,
-							accentColor + "/" + label + " setjoinmsg <true/false>: " + textColor
-									+ DESC_JOIN_MSG});
+							accentColor + "/" + label + " setJoinMsg <true/false>: " + textColor + DESC_JOIN_MSG });
 
 					break;
 
@@ -470,6 +463,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 				case "values":
 					sender.sendMessage(new String[] { header + "Values:",
+							accentColor + "Join Message: " + textColor + (joinMsg ? "true" : "false"),
 							accentColor + "Starts Activated: " + textColor + (startActivated ? "true" : "false"),
 							accentColor + "Limit: " + textColor + (maxBlocks < 0 ? "unbounded" : maxBlocks),
 							accentColor + "Vip Mode: " + textColor + (vipMode ? "enabled" : "disabled"),
@@ -950,6 +944,105 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			sender.sendMessage(header + errorColor + "You don't have permission to use this command.");
 		}
 		return bueno;
+	}
+
+	@Override
+	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+		List<String> list = new ArrayList<>();
+		switch (args.length) {
+		case 0:
+			list.add("help");
+			if (sender.hasPermission("cristreecapitator.admin")) {
+				list.add("update");
+				list.add("reload");
+			}
+			list.add("toggle");
+			if (sender.hasPermission("cristreecapitator.admin")) {
+				list.add("values");
+				list.add("setLimit");
+				list.add("setVipMode");
+				list.add("setReplant");
+				list.add("setInvincibleReplant");
+				list.add("setAxeNeeded");
+				list.add("setDamageAxe");
+				list.add("setBreakAxes");
+				list.add("setNetherTrees");
+				list.add("setStartActivated");
+				list.add("setJoinMsg");
+			}
+			break;
+		case 1:
+			args[0] = args[0].toLowerCase();
+			switch (args[0]) {
+			case "help":
+			case "update":
+			case "reload":
+			case "toggle":
+				break;
+
+			default:
+				if ("help".startsWith(args[0]))
+					list.add("help");
+				if (sender.hasPermission("cristreecapitator.admin")) {
+					if ("update".startsWith(args[0]))
+						list.add("update");
+					if ("reload".startsWith(args[0]))
+						list.add("reload");
+				}
+				if ("toggle".startsWith(args[0]))
+					list.add("toggle");
+				if (sender.hasPermission("cristreecapitator.admin")) {
+					if ("values".startsWith(args[0]))
+						list.add("values");
+					if ("setlimit".startsWith(args[0]))
+						list.add("setLimit");
+					if ("setvipmode".startsWith(args[0]))
+						list.add("setVipMode");
+					if ("setreplant".startsWith(args[0]))
+						list.add("setReplant");
+					if ("setinvinciblereplant".startsWith(args[0]))
+						list.add("setInvincibleReplant");
+					if ("setaxeneeded".startsWith(args[0]))
+						list.add("setAxeNeeded");
+					if ("setdamageaxe".startsWith(args[0]))
+						list.add("setDamageAxe");
+					if ("setbreakaxe".startsWith(args[0]))
+						list.add("setBreakAxes");
+					if ("setnethertrees".startsWith(args[0]))
+						list.add("setNetherTrees");
+					if ("setstartactivated".startsWith(args[0]))
+						list.add("setStartActivated");
+					if ("setjoinmsg".startsWith(args[0]))
+						list.add("setJoinMsg");
+				}
+				break;
+			}
+			break;
+
+		case 2:
+			args[0] = args[0].toLowerCase();
+			switch (args[0]) {
+			case "setlimit":
+				break;
+			case "setvipmode":
+			case "setreplant":
+			case "setinvinciblereplant":
+			case "setaxeneeded":
+			case "setdamageaxe":
+			case "setbreakaxe":
+			case "setnethertrees":
+			case "setstartactivated":
+			case "setjoinmsg":
+				list.add("true");
+				list.add("false");
+			default:
+				break;
+			}
+			break;
+		default:
+			break;
+		}
+		return list;
 	}
 
 	/**
