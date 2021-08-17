@@ -45,28 +45,57 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	// Options
 	private Configuration config;
+	
 	private static final String STRG_MAX_BLOCKS = "destroy limit";
 	private int maxBlocks = -1;
+	private static final String DESC_MAX_BLOCKS = "Sets the maximun number of logs and leaves that can be destroyed at once. -1 to unlimit.";
+
 	private static final String STRG_VIP_MODE = "vip mode";
 	private boolean vipMode = false;
+	private static final String DESC_VIP_MODE = "Sets vip mode. If enabled, a permission node (cristreecapitator.vip) is required to take down trees at once.";
+
 	private static final String STRG_AXE_NEEDED = "axe needed";
 	private boolean axeNeeded = true;
+	private static final String DESC_AXE_NEEDED = "Sets if an axe is required to Cut down trees at once.";
+
 	private static final String STRG_DAMAGE_AXE = "damage axe";
 	private boolean damageAxe = true;
+	private static final String DESC_DAMAGE_AXE = "If \"" + STRG_AXE_NEEDED
+			+ "\" is set to true, sets if axes used are damaged or not. If \"" + STRG_AXE_NEEDED
+			+ "\" is false, this option is ignored.";
+
 	private static final String STRG_BREAK_AXE = "break axe";
 	private boolean breakAxe = false;
+	private static final String DESC_BREAK_AXE = "If \"" + STRG_AXE_NEEDED + "\" and \"" + STRG_DAMAGE_AXE
+			+ "\" are set to true, sets if the axe should not be broken. Otherwise this option is ignored.";
+
 	private static final String STRG_REPLANT = "replant";
 	private boolean replant = true;
+	private static final String DESC_REPLANT = "Sets if trees should be replanted automatically.";
+
 	private static final String STRG_INVINCIBLE_REPLANT = "invincible replant";
 	private boolean invincibleReplant = false;
+	private static final String DESC_INVINCIBLE_REPLANT = "Sets if saplings replanted by this plugin should be unbreakable (including the block beneath).";
+
 	private static final String STRG_ADMIT_NETHER_TREES = "cut nether \"trees\"";
 	private boolean admitNetherTrees = false;
+	private static final String DESC_ADMIT_NETHER_TREES = "Sets if the new 1.16 nether trees should be cut down as well (it does nothing in prior versions).";
+
 	private static final String STRG_START_ACTIVATED = "start activated";
 	private boolean startActivated = true;
+	private static final String DESC_START_ACTIVATED = "Sets if plugin is activated for player when they enter the server. If false, players will need to use /tc toggle to activate it for themselves.";
+
+	private static final String STRG_JOIN_MSG = "initial message";
+	private boolean joinMsg = true;
+	private static final String DESC_JOIN_MSG = "It enables a message reminding the player about /tc toggle when they join the server. The message changes depending on the value of \""
+			+ STRG_START_ACTIVATED + "\".";
+	//TODO: Configuración sobre romper las hojas.
 
 	// Messages
-	private final String joinMensajeActivated = header + "Remember " + accentColor + "{player}" + textColor + ", you can use " + accentColor + "/tc toggle" + textColor + " to avoid breaking things made of logs.";
-	private final String joinMensajeDeactivated = header + "Remember " + accentColor + "{player}" + textColor + ", you can use " + accentColor + "/tc toggle" + textColor + " to cut down trees faster.";
+	private final String joinMensajeActivated = header + "Remember " + accentColor + "{player}" + textColor
+			+ ", you can use " + accentColor + "/tc toggle" + textColor + " to avoid breaking things made of logs.";
+	private final String joinMensajeDeactivated = header + "Remember " + accentColor + "{player}" + textColor
+			+ ", you can use " + accentColor + "/tc toggle" + textColor + " to cut down trees faster.";
 
 	// Metadata
 	private static final String PLAYER_ENABLE_META = "cristichi_treecap_meta_disable";
@@ -110,38 +139,34 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		config.reloadConfig();
 
 		maxBlocks = config.getInt(STRG_MAX_BLOCKS, maxBlocks);
-		config.setInfo(STRG_MAX_BLOCKS,
-				"Sets the maximun number of logs and leaves that can be destroyed at once. -1 to unlimit.");
+		config.setInfo(STRG_MAX_BLOCKS, DESC_MAX_BLOCKS);
 
 		vipMode = config.getBoolean(STRG_VIP_MODE, vipMode);
-		config.setInfo(STRG_VIP_MODE,
-				"Sets vip mode. If enabled, a permission node (cristreecapitator.vip) is required to take down trees at once.");
+		config.setInfo(STRG_VIP_MODE, DESC_VIP_MODE);
 
 		axeNeeded = config.getBoolean(STRG_AXE_NEEDED, axeNeeded);
-		config.setInfo(STRG_AXE_NEEDED, "Sets if an axe is required to Cut down trees at once.");
+		config.setInfo(STRG_AXE_NEEDED, DESC_AXE_NEEDED);
 
 		damageAxe = config.getBoolean(STRG_DAMAGE_AXE, damageAxe);
-		config.setInfo(STRG_DAMAGE_AXE,
-				"If " + STRG_AXE_NEEDED + " is set to true, sets if axes used are damaged or not. If " + STRG_AXE_NEEDED + " is false, this option is ignored.");
+		config.setInfo(STRG_DAMAGE_AXE, DESC_DAMAGE_AXE);
 
 		breakAxe = config.getBoolean(STRG_BREAK_AXE, damageAxe);
-		config.setInfo(STRG_BREAK_AXE, "If " + STRG_AXE_NEEDED + " and " + STRG_DAMAGE_AXE
-				+ " are set to true, sets if the axe should not be broken.");
+		config.setInfo(STRG_BREAK_AXE, DESC_BREAK_AXE);
 
 		replant = config.getBoolean(STRG_REPLANT, replant);
-		config.setInfo(STRG_REPLANT, "Sets if trees should be replanted automatically.");
+		config.setInfo(STRG_REPLANT, DESC_REPLANT);
 
 		invincibleReplant = config.getBoolean(STRG_INVINCIBLE_REPLANT, invincibleReplant);
-		config.setInfo(STRG_INVINCIBLE_REPLANT,
-				"Sets if saplings replanted by this plugin should be unbreakable (including the block beneath).");
-		
+		config.setInfo(STRG_INVINCIBLE_REPLANT, DESC_INVINCIBLE_REPLANT);
+
 		admitNetherTrees = config.getBoolean(STRG_ADMIT_NETHER_TREES, admitNetherTrees);
-		config.setInfo(STRG_ADMIT_NETHER_TREES,
-				"Sets if the new 1.16 nether trees should be cut down as well (it does nothing in prior versions).");
+		config.setInfo(STRG_ADMIT_NETHER_TREES, DESC_ADMIT_NETHER_TREES);
 
 		startActivated = config.getBoolean(STRG_START_ACTIVATED, startActivated);
-		config.setInfo(STRG_START_ACTIVATED,
-				"Sets if plugin is activated for player when they enter the server. If false, players will need to use /tc toggle to activate it for themselves.");
+		config.setInfo(STRG_START_ACTIVATED, DESC_START_ACTIVATED);
+
+		joinMsg = config.getBoolean(STRG_JOIN_MSG, joinMsg);
+		config.setInfo(STRG_JOIN_MSG, DESC_JOIN_MSG);
 	}
 
 	private void saveConfiguration() {
@@ -155,6 +180,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			config.setValue(STRG_INVINCIBLE_REPLANT, invincibleReplant);
 			config.setValue(STRG_ADMIT_NETHER_TREES, admitNetherTrees);
 			config.setValue(STRG_START_ACTIVATED, startActivated);
+			config.setValue(STRG_JOIN_MSG, joinMsg);
 			config.saveConfig();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -168,16 +194,18 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
-		Player p = e.getPlayer();
-		boolean enabled = startActivated;
-		List<MetadataValue> metas = p.getMetadata(PLAYER_ENABLE_META);
-		for (MetadataValue meta : metas) {
-			enabled = meta.asBoolean();
+		if (joinMsg) {
+			Player p = e.getPlayer();
+			boolean enabled = startActivated;
+			List<MetadataValue> metas = p.getMetadata(PLAYER_ENABLE_META);
+			for (MetadataValue meta : metas) {
+				enabled = meta.asBoolean();
+			}
+			if (enabled)
+				p.sendMessage(joinMensajeActivated.replace("{player}", p.getDisplayName()));
+			else
+				p.sendMessage(joinMensajeDeactivated.replace("{player}", p.getDisplayName()));
 		}
-		if (enabled)
-			p.sendMessage(joinMensajeActivated.replace("{player}", p.getDisplayName()));
-		else
-			p.sendMessage(joinMensajeDeactivated.replace("{player}", p.getDisplayName()));
 	}
 
 	@EventHandler
@@ -406,29 +434,33 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					sender.sendMessage(new String[] { header + "Commands:\n",
 							accentColor + "/" + label + " help: " + textColor + "Shows this help message.",
 							accentColor + "/" + label + " update: " + textColor
-							+ "Updates the plugin if there is a new version.",
+									+ "Updates the plugin if there is a new version. Only recomended if your server works on Minecraft 1.13 or superior.",
 							accentColor + "/" + label + " reload: " + textColor
-							+ "Looks for changes in the configuration file and applies them.",
+									+ "Looks for changes in the configuration file and applies them.",
 							accentColor + "/" + label + " toggle <true/false>: " + textColor
-							+ "Toggles the plugin to work on you.",
+									+ "Toggles the plugin to work or not on you.",
 							accentColor + "/" + label + " values: " + textColor
-							+ "Checks the values set in the configuration.",
+									+ "Checks the values set in the configuration.",
 							accentColor + "/" + label + " setLimit <number>: " + textColor
-									+ "Sets the block limit to break each time. Negative number for unlimited.",
+									+ DESC_MAX_BLOCKS,
 							accentColor + "/" + label + " setVipMode <true/false>: " + textColor
-									+ "Enables or disables Vip Mode (if cristreecapitator.vip is needed to take down trees at once)",
+									+ DESC_VIP_MODE,
 							accentColor + "/" + label + " setReplant <true/false>: " + textColor
-									+ "Enables autoreplanting.",
+									+ DESC_REPLANT,
 							accentColor + "/" + label + " setInvincibleReplanting <true/false>: " + textColor
-									+ "Replanted saplings are invincible. Ignored if replanting is not enabled.",
+									+ DESC_INVINCIBLE_REPLANT,
 							accentColor + "/" + label + " setAxeNeeded <true/false>: " + textColor
-									+ "Sets if an axe is needed for the plugin to act.",
+									+ DESC_AXE_NEEDED,
 							accentColor + "/" + label + " setDamageAxe <true/false>: " + textColor
-									+ "Sets if, in case an axe is needed, it should be damage.",
+									+ DESC_DAMAGE_AXE,
 							accentColor + "/" + label + " setBreakAxes <true/false>: " + textColor
-									+ "Sets if, in case an axe is needed and damaged, it should never be broken (when used on logs, not leaves).",
+									+ DESC_BREAK_AXE,
 							accentColor + "/" + label + " setNetherTrees <true/false>: " + textColor
-									+ "Sets if nether trees can be cut down at once or not." });
+									+ DESC_ADMIT_NETHER_TREES,
+							accentColor + "/" + label + " setStartActivated <true/false>: " + textColor
+									+ DESC_START_ACTIVATED,
+							accentColor + "/" + label + " setjoinmsg <true/false>: " + textColor
+									+ DESC_JOIN_MSG});
 
 					break;
 
@@ -447,8 +479,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "Axe Needed: " + textColor + (axeNeeded ? "true" : "false"),
 							accentColor + "Axe Damaged: " + textColor + (axeNeeded ? "true" : "false"),
 							accentColor + "Damage Axe: " + textColor + (damageAxe ? "enabled" : "disabled"),
-							accentColor + "Break Axe: " + textColor + (breakAxe ? "enabled" : "disabled"),
-							});
+							accentColor + "Break Axe: " + textColor + (breakAxe ? "enabled" : "disabled"), });
 					break;
 
 				case "toggle":
@@ -835,6 +866,49 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 					break;
 
+				case "setjoinmsg":
+				case "setjoinmessage":
+				case "joinmsg":
+				case "joinmessage":
+					if (sender.hasPermission("cristreecapitator.admin")) {
+						if (args.length != 2) {
+							sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+									+ " <true/false/yes/no>" + textColor + ".");
+						} else {
+							switch (args[1]) {
+							case "true":
+							case "yes":
+								joinMsg = true;
+								break;
+							case "false":
+							case "no":
+								joinMsg = false;
+								break;
+
+							default:
+								sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+										+ " <true/false/yes/no>" + textColor + ". (" + accentColor + args[1] + textColor
+										+ " is not a valid argument)");
+								break;
+							}
+							config.setValue(STRG_JOIN_MSG, joinMsg);
+							try {
+								config.saveConfig();
+								sender.sendMessage(header + (joinMsg
+										? "Message reminding /tc toggle on join set to " + accentColor + "true"
+										: "Message reminding /tc toggle on join set to " + accentColor + "false"));
+							} catch (IOException e) {
+								sender.sendMessage(header + errorColor
+										+ "Error trying to save the value in the configuration file.");
+								e.printStackTrace();
+							}
+						}
+					} else {
+						sinPermiso = true;
+					}
+
+					break;
+
 				case "reload":
 					if (sender.hasPermission("cristreecapitator.admin")) {
 						loadConfiguration();
@@ -898,7 +972,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 				if (dmg >= maxDmg) {
 					if (breakAxe) {
-						player.sendMessage(header+"breakAxe: "+breakAxe);
+						player.sendMessage(header + "breakAxe: " + breakAxe);
 						tool.setAmount(0);
 						player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1, 1);
 					} else {
@@ -928,6 +1002,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	}
 
 	private boolean isDirt(Block below) {
-		return below.getType().equals(Material.DIRT) || below.getType().equals(Material.GRASS_BLOCK)|| below.getType().equals(Material.PODZOL);
+		return below.getType().equals(Material.DIRT) || below.getType().equals(Material.GRASS_BLOCK)
+				|| below.getType().equals(Material.PODZOL);
 	}
 }
