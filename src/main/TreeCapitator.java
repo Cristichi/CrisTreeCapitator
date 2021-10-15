@@ -76,19 +76,19 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	private static final String STRG_INVINCIBLE_REPLANT = "invincible replant";
 	private boolean invincibleReplant = false;
-	private static final String DESC_INVINCIBLE_REPLANT = "Sets if saplings replanted by this plugin should be unbreakable (including the block beneath).";
+	private static final String DESC_INVINCIBLE_REPLANT = "Sets if saplings replanted by this plugin should be unbreakable by regular players (including the block beneath).";
 
 	private static final String STRG_ADMIT_NETHER_TREES = "cut nether \"trees\"";
 	private boolean admitNetherTrees = false;
-	private static final String DESC_ADMIT_NETHER_TREES = "Sets if the new 1.16 nether trees should be cut down as well (it does nothing in prior versions).";
+	private static final String DESC_ADMIT_NETHER_TREES = "Sets if the new 1.16 nether trees should be treated as regular trees, and therefore cut down entirely as well.";
 
 	private static final String STRG_START_ACTIVATED = "start activated";
 	private boolean startActivated = true;
-	private static final String DESC_START_ACTIVATED = "Sets if plugin is activated for player when they enter the server. If false, players will need to use /tc toggle to activate it for themselves.";
+	private static final String DESC_START_ACTIVATED = "Sets if this plugin starts activated for players when they enter the server. If false, players will need to use /tc toggle to activate it for themselves.";
 
 	private static final String STRG_JOIN_MSG = "initial message";
 	private boolean joinMsg = true;
-	private static final String DESC_JOIN_MSG = "It enables a message reminding the player about /tc toggle when they join the server. The message changes depending on the value of \""
+	private static final String DESC_JOIN_MSG = "If true, it sends each player a message about /tc toggle when they join the server. The message changes depending on the value of \""
 			+ STRG_START_ACTIVATED + "\".";
 
 	// Messages
