@@ -116,7 +116,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	public void onEnable() {
 		wg = (WorldGuardPlugin) getServer().getPluginManager().getPlugin("WorldGuard");
 		if (wg == null)
-			getLogger().info("WorldGuard not found. Maybe WorldGuard or this plugin is not up to date?");
+			getLogger().info("WorldGuard not found. Maybe WorldGuard or this plugin are not up to date?");
 		else
 			getLogger().info("WorldGuard found, extra protection enabled.");
 
