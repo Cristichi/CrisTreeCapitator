@@ -91,6 +91,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private static final String DESC_JOIN_MSG = "If true, it sends each player a message about /tc toggle when they join the server. The message changes depending on the value of \""
 			+ STRG_START_ACTIVATED + "\".";
 
+	private static final String STRG_IGNORE_LEAVES = "ignore leaves";
+	private boolean ignoreLeaves = false;
+	private static final String DESC_IGNORE_LEAVES = "If true, leaves will not be destroyed and will not connect logs. In vanilla terrain forests this will prevent several trees to be cut down at once, but it will leave most big oak trees floating.";
+
 	// Messages
 	private final String joinMensajeActivated = header + "Remember " + accentColor + "{player}" + textColor
 			+ ", you can use " + accentColor + "/tc toggle" + textColor + " to avoid breaking things made of logs.";
@@ -167,6 +171,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 		joinMsg = config.getBoolean(STRG_JOIN_MSG, joinMsg);
 		config.setInfo(STRG_JOIN_MSG, DESC_JOIN_MSG);
+
+		ignoreLeaves = config.getBoolean(STRG_IGNORE_LEAVES, ignoreLeaves);
+		config.setInfo(STRG_IGNORE_LEAVES, DESC_IGNORE_LEAVES);
 	}
 
 	private void saveConfiguration() {
@@ -181,6 +188,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			config.setValue(STRG_ADMIT_NETHER_TREES, admitNetherTrees);
 			config.setValue(STRG_START_ACTIVATED, startActivated);
 			config.setValue(STRG_JOIN_MSG, joinMsg);
+			config.setValue(STRG_IGNORE_LEAVES, ignoreLeaves);
 			config.saveConfig();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -453,7 +461,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 									+ DESC_ADMIT_NETHER_TREES,
 							accentColor + "/" + label + " setStartActivated <true/false>: " + textColor
 									+ DESC_START_ACTIVATED,
-							accentColor + "/" + label + " setJoinMsg <true/false>: " + textColor + DESC_JOIN_MSG });
+							accentColor + "/" + label + " setJoinMsg <true/false>: " + textColor + DESC_JOIN_MSG,
+							accentColor + "/" + label + " setIgnoreLeaves <true/false>: " + textColor + DESC_IGNORE_LEAVES
+							});
 
 					break;
 
@@ -463,17 +473,19 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 				case "values":
 					sender.sendMessage(new String[] { header + "Values:",
-							accentColor + "Join Message: " + textColor + (joinMsg ? "true" : "false"),
-							accentColor + "Starts Activated: " + textColor + (startActivated ? "true" : "false"),
+							accentColor + "Join Message: " + textColor + (joinMsg ? "show" : "not show"),
+							accentColor + "Starts Activated: " + textColor + (startActivated ? "yes" : "no"),
 							accentColor + "Limit: " + textColor + (maxBlocks < 0 ? "unbounded" : maxBlocks),
 							accentColor + "Vip Mode: " + textColor + (vipMode ? "enabled" : "disabled"),
 							accentColor + "Replant: " + textColor + (replant ? "enabled" : "disabled"),
 							accentColor + "Invincible replant: " + textColor
 									+ (invincibleReplant ? "enabled" : "disabled"),
-							accentColor + "Axe Needed: " + textColor + (axeNeeded ? "true" : "false"),
-							accentColor + "Axe Damaged: " + textColor + (axeNeeded ? "true" : "false"),
-							accentColor + "Damage Axe: " + textColor + (damageAxe ? "enabled" : "disabled"),
-							accentColor + "Break Axe: " + textColor + (breakAxe ? "enabled" : "disabled"), });
+							accentColor + "Axe Needed: " + textColor + (axeNeeded ? "yes" : "no"),
+							accentColor + "Axe Damaged: " + textColor + (axeNeeded ? "yes" : "no"),
+							accentColor + "Damage Axe: " + textColor + (damageAxe ? "yes" : "no"),
+							accentColor + "Break Axe: " + textColor + (breakAxe ? "yes" : "no"), 
+							accentColor + "Ignore Leaves: " + textColor + (ignoreLeaves ? "yes" : "no"), 
+							});
 					break;
 
 				case "toggle":
@@ -903,6 +915,47 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 					break;
 
+				case "setignoreleaves":
+				case "ignoreleaves":
+					if (sender.hasPermission("cristreecapitator.admin")) {
+						if (args.length != 2) {
+							sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+									+ " <true/false/yes/no>" + textColor + ".");
+						} else {
+							switch (args[1]) {
+							case "true":
+							case "yes":
+								ignoreLeaves = true;
+								break;
+							case "false":
+							case "no":
+								ignoreLeaves = false;
+								break;
+
+							default:
+								sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+										+ " <true/false/yes/no>" + textColor + ". (" + accentColor + args[1] + textColor
+										+ " is not a valid argument)");
+								break;
+							}
+							config.setValue(STRG_IGNORE_LEAVES, ignoreLeaves);
+							try {
+								config.saveConfig();
+								sender.sendMessage(header + (joinMsg
+										? "Message reminding /tc toggle on join set to " + accentColor + "true"
+										: "Message reminding /tc toggle on join set to " + accentColor + "false"));
+							} catch (IOException e) {
+								sender.sendMessage(header + errorColor
+										+ "Error trying to save the value in the configuration file.");
+								e.printStackTrace();
+							}
+						}
+					} else {
+						sinPermiso = true;
+					}
+
+					break;
+
 				case "reload":
 					if (sender.hasPermission("cristreecapitator.admin")) {
 						loadConfiguration();
@@ -969,6 +1022,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				list.add("setNetherTrees");
 				list.add("setStartActivated");
 				list.add("setJoinMsg");
+				list.add("setIgnoreLeaves");
 			}
 			break;
 		case 1:
@@ -1014,6 +1068,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 						list.add("setStartActivated");
 					if ("setjoinmsg".startsWith(args[0]))
 						list.add("setJoinMsg");
+					if ("setignoreleaves".startsWith(args[0]))
+						list.add("setIgnoreLeaves");
 				}
 				break;
 			}
@@ -1033,6 +1089,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			case "setnethertrees":
 			case "setstartactivated":
 			case "setjoinmsg":
+			case "setignoreleaves":
 				list.add("true");
 				list.add("false");
 			default:
@@ -1087,6 +1144,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	}
 
 	private boolean isLeaves(Material mat) {
+		if (ignoreLeaves)
+			return false;
 		boolean ret = mat.name().contains("LEAVES");
 		if (!ret && admitNetherTrees)
 			return ret || mat.name().equals("NETHER_WART_BLOCK") || mat.name().equals("WARPED_WART_BLOCK")
