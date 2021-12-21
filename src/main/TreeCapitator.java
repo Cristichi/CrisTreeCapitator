@@ -942,8 +942,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							try {
 								config.saveConfig();
 								sender.sendMessage(header + (joinMsg
-										? "Message reminding /tc toggle on join set to " + accentColor + "true"
-										: "Message reminding /tc toggle on join set to " + accentColor + "false"));
+										? "Leaves will be " + accentColor + "left untouched"
+										: "Leaves will be " + accentColor + "removed"));
 							} catch (IOException e) {
 								sender.sendMessage(header + errorColor
 										+ "Error trying to save the value in the configuration file.");

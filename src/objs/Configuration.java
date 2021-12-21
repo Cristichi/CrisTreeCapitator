@@ -162,7 +162,7 @@ public class Configuration extends File implements Cloneable {
 			if (info != null) {
 				configTxt += "#" + info + "\n";
 			}
-			configTxt += key + ": " + value + "\n";
+			configTxt += key + ": " + value + "\n\n";
 		}
 
 		if (exists()) {
