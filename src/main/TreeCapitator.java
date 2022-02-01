@@ -1076,7 +1076,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				list.add("setReplant");
 				list.add("setInvincibleReplant");
 				list.add("setAxeNeeded");
-                list.add("setAxeTypeRequired");
+				list.add("setAxeTypeRequired");
 				list.add("setDamageAxe");
 				list.add("setBreakAxes");
 				list.add("setNetherTrees");
@@ -1118,8 +1118,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 						list.add("setInvincibleReplant");
 					if ("setaxeneeded".startsWith(args[0]))
 						list.add("setAxeNeeded");
-                    if ("setaxetyperequired".startsWith(args[0]))
-                        list.add("setAxeTypeRequired");
+					if ("setaxetyperequired".startsWith(args[0]))
+						list.add("setAxeTypeRequired");
 					if ("setdamageaxe".startsWith(args[0]))
 						list.add("setDamageAxe");
 					if ("setbreakaxe".startsWith(args[0]))
