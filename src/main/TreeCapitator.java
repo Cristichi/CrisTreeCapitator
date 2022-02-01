@@ -62,7 +62,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private static final String DESC_AXE_NEEDED = "Sets if an axe is required to Cut down trees at once.";
 
 	private static final String STRG_AXE_TYPE_REQUIRED = "axe type required";
-	private String axeTypeRequired = null;
+	private int axeTypeRequired = null;
     private static final String DESC_AXE_TYPE_REQUIRED = """
         (Optional) Set a specific type of axe required to cut down trees at once. Requires axeNeeded to be set to true.
         Options:
