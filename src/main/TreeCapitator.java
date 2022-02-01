@@ -29,6 +29,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
 import objs.Configuration;
+import objs.AxeTypeInput;
+import objs.AxeType;
 import updater.Updater;
 
 public class TreeCapitator extends JavaPlugin implements Listener {
@@ -58,6 +60,20 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private static final String STRG_AXE_NEEDED = "axe needed";
 	private boolean axeNeeded = true;
 	private static final String DESC_AXE_NEEDED = "Sets if an axe is required to Cut down trees at once.";
+
+	private static final String STRG_AXE_TYPE_REQUIRED = "axe type required";
+	private String axeTypeRequired = null;
+    private static final String DESC_AXE_TYPE_REQUIRED = """
+        (Optional) Set a specific type of axe required to cut down trees at once. Requires axeNeeded to be set to true.
+        Options:
+        -1 = allow any axe.
+        1 = wooden axe.
+        2 = stone axe.
+        3 = iron axe.
+        4 = golden axe.
+        5 = diamond axe.
+        6 = netherite axe.
+        """;
 
 	private static final String STRG_DAMAGE_AXE = "damage axe";
 	private boolean damageAxe = true;
@@ -151,6 +167,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		axeNeeded = config.getBoolean(STRG_AXE_NEEDED, axeNeeded);
 		config.setInfo(STRG_AXE_NEEDED, DESC_AXE_NEEDED);
 
+        axeTypeRequired = config.getInt(STRG_AXE_TYPE_REQUIRED, axeTypeRequired);
+        config.setInfo(STRG_AXE_TYPE_REQUIRED, DESC_AXE_TYPE_REQUIRED);
+
 		damageAxe = config.getBoolean(STRG_DAMAGE_AXE, damageAxe);
 		config.setInfo(STRG_DAMAGE_AXE, DESC_DAMAGE_AXE);
 
@@ -181,6 +200,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			config.setValue(STRG_MAX_BLOCKS, maxBlocks);
 			config.setValue(STRG_VIP_MODE, vipMode);
 			config.setValue(STRG_AXE_NEEDED, axeNeeded);
+            config.setValue(STRG_AXE_TYPE_REQUIRED, axeTypeRequired);
 			config.setValue(STRG_DAMAGE_AXE, damageAxe);
 			config.setValue(STRG_BREAK_AXE, breakAxe);
 			config.setValue(STRG_REPLANT, replant);
@@ -243,9 +263,14 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					if (axeNeeded) {
 						PlayerInventory inv = player.getInventory();
 						ItemStack hand = inv.getItemInMainHand();
-						if (!hand.getType().name().contains("_AXE")) {
+                        final String itemName = hand.getType().name();
+                        final boolean doesHandContainAxe = itemName.contains("_AXE");
+						if (!doesHandContainAxe) {
 							cutDown = false;
-						}
+						} else if (AxeTypeInput.isValid(axeTypeRequired) && itemName.contains(AxeType.getAxeName(axeTypeRequired))) {
+                            cutDown = true;
+                        }
+
 					}
 					if (cutDown) {
 						if (replant) {
@@ -455,6 +480,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "/" + label + " setInvincibleReplanting <true/false>: " + textColor
 									+ DESC_INVINCIBLE_REPLANT,
 							accentColor + "/" + label + " setAxeNeeded <true/false>: " + textColor + DESC_AXE_NEEDED,
+                            accentColor + "/" + label + " setAxeTypeRequired <number>: " + textColor + DESC_AXE_TYPE_REQUIRED,
 							accentColor + "/" + label + " setDamageAxe <true/false>: " + textColor + DESC_DAMAGE_AXE,
 							accentColor + "/" + label + " setBreakAxes <true/false>: " + textColor + DESC_BREAK_AXE,
 							accentColor + "/" + label + " setNetherTrees <true/false>: " + textColor
@@ -481,10 +507,11 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "Invincible replant: " + textColor
 									+ (invincibleReplant ? "enabled" : "disabled"),
 							accentColor + "Axe Needed: " + textColor + (axeNeeded ? "yes" : "no"),
+                            accentColor + "Axe Type Required: " + textColor + (AxeTypeInput.isValid(axeTypeRequired) ? axeTypeRequired : "disabled")
 							accentColor + "Axe Damaged: " + textColor + (axeNeeded ? "yes" : "no"),
 							accentColor + "Damage Axe: " + textColor + (damageAxe ? "yes" : "no"),
-							accentColor + "Break Axe: " + textColor + (breakAxe ? "yes" : "no"), 
-							accentColor + "Ignore Leaves: " + textColor + (ignoreLeaves ? "yes" : "no"), 
+							accentColor + "Break Axe: " + textColor + (breakAxe ? "yes" : "no"),
+							accentColor + "Ignore Leaves: " + textColor + (ignoreLeaves ? "yes" : "no"),
 							});
 					break;
 
@@ -693,6 +720,38 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 								sender.sendMessage(header + errorColor
 										+ "Error trying to save the value in the configuration file.");
 								e.printStackTrace();
+							}
+						}
+					} else {
+						sinPermiso = true;
+					}
+
+					break;
+
+				case "axetyperequired":
+				case "setaxetyperequired":
+					if (sender.hasPermission("cristreecapitator.admin")) {
+						if (args.length != 2) {
+							sender.sendMessage(header + "Axe type required is currently " + accentColor
+									+ axeTypeRequired + textColor + ".");
+						} else {
+							try {
+								int nuevoAxeTypeRequired = Integer.parseInt(args[1]);
+								axeTypeRequired = AxeTypeInput.isValid(nuevoAxeTypeRequired) ? nuevoAxeTypeRequired : -1;
+								config.setValue(STRG_AXE_TYPE_REQUIRED, axeTypeRequired);
+								try {
+									config.saveConfig();
+									sender.sendMessage(
+											header + "Axe type required set to " + (AxeTypeInput.isValid(axeTypeRequired) < 0 ? "all axes" : AxeType.getAxeName(axeTypeRequired)) + ".");
+								} catch (IOException e) {
+									sender.sendMessage(header + errorColor
+											+ "Error trying to save the value in the configuration file.");
+									e.printStackTrace();
+								}
+							} catch (NumberFormatException e) {
+								sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+										+ " <number>" + textColor + ". (" + accentColor + args[1] + textColor
+										+ " is not a valid number)");
 							}
 						}
 					} else {
@@ -1017,6 +1076,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				list.add("setReplant");
 				list.add("setInvincibleReplant");
 				list.add("setAxeNeeded");
+                list.add("setAxeTypeRequired");
 				list.add("setDamageAxe");
 				list.add("setBreakAxes");
 				list.add("setNetherTrees");
@@ -1058,6 +1118,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 						list.add("setInvincibleReplant");
 					if ("setaxeneeded".startsWith(args[0]))
 						list.add("setAxeNeeded");
+                    if ("setaxetyperequired".startsWith(args[0]))
+                        list.add("setAxeTypeRequired");
 					if ("setdamageaxe".startsWith(args[0]))
 						list.add("setDamageAxe");
 					if ("setbreakaxe".startsWith(args[0]))
@@ -1104,7 +1166,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	/**
 	 * Deals 1 damage to an item, if possible
-	 * 
+	 *
 	 * @param player
 	 * @param tool
 	 * @return true if item is destroyed or should not be damaged anymore, false if
