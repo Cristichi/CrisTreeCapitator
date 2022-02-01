@@ -200,7 +200,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			config.setValue(STRG_MAX_BLOCKS, maxBlocks);
 			config.setValue(STRG_VIP_MODE, vipMode);
 			config.setValue(STRG_AXE_NEEDED, axeNeeded);
-            config.setValue(STRG_AXE_TYPE_REQUIRED, axeTypeRequired);
+			config.setValue(STRG_AXE_TYPE_REQUIRED, axeTypeRequired);
 			config.setValue(STRG_DAMAGE_AXE, damageAxe);
 			config.setValue(STRG_BREAK_AXE, breakAxe);
 			config.setValue(STRG_REPLANT, replant);
@@ -263,13 +263,13 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					if (axeNeeded) {
 						PlayerInventory inv = player.getInventory();
 						ItemStack hand = inv.getItemInMainHand();
-                        final String itemName = hand.getType().name();
-                        final boolean doesHandContainAxe = itemName.contains("_AXE");
+						final String itemName = hand.getType().name();
+						final boolean doesHandContainAxe = itemName.contains("_AXE");
 						if (!doesHandContainAxe) {
 							cutDown = false;
 						} else if (AxeTypeInput.isValid(axeTypeRequired) && itemName.contains(AxeType.getAxeName(axeTypeRequired))) {
-                            cutDown = true;
-                        }
+							cutDown = true;
+						}
 
 					}
 					if (cutDown) {
@@ -480,7 +480,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "/" + label + " setInvincibleReplanting <true/false>: " + textColor
 									+ DESC_INVINCIBLE_REPLANT,
 							accentColor + "/" + label + " setAxeNeeded <true/false>: " + textColor + DESC_AXE_NEEDED,
-                            accentColor + "/" + label + " setAxeTypeRequired <number>: " + textColor + DESC_AXE_TYPE_REQUIRED,
+							accentColor + "/" + label + " setAxeTypeRequired <number>: " + textColor + DESC_AXE_TYPE_REQUIRED,
 							accentColor + "/" + label + " setDamageAxe <true/false>: " + textColor + DESC_DAMAGE_AXE,
 							accentColor + "/" + label + " setBreakAxes <true/false>: " + textColor + DESC_BREAK_AXE,
 							accentColor + "/" + label + " setNetherTrees <true/false>: " + textColor
@@ -507,7 +507,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "Invincible replant: " + textColor
 									+ (invincibleReplant ? "enabled" : "disabled"),
 							accentColor + "Axe Needed: " + textColor + (axeNeeded ? "yes" : "no"),
-                            accentColor + "Axe Type Required: " + textColor + (AxeTypeInput.isValid(axeTypeRequired) ? axeTypeRequired : "disabled")
+							accentColor + "Axe Type Required: " + textColor + (AxeTypeInput.isValid(axeTypeRequired) ? axeTypeRequired : "disabled")
 							accentColor + "Axe Damaged: " + textColor + (axeNeeded ? "yes" : "no"),
 							accentColor + "Damage Axe: " + textColor + (damageAxe ? "yes" : "no"),
 							accentColor + "Break Axe: " + textColor + (breakAxe ? "yes" : "no"),
