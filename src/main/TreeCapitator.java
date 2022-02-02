@@ -63,17 +63,15 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	private static final String STRG_AXE_TYPE_REQUIRED = "axe type required";
 	private int axeTypeRequired = -1;
-    private static final String DESC_AXE_TYPE_REQUIRED = """
-        (Optional) Set a specific type of axe required to cut down trees at once. Requires axeNeeded to be set to true.
-        Options:
-        -1 = allow any axe.
-        1 = wooden axe.
-        2 = stone axe.
-        3 = iron axe.
-        4 = golden axe.
-        5 = diamond axe.
-        6 = netherite axe.
-        """;
+    private static final String DESC_AXE_TYPE_REQUIRED = "(Optional) Set a specific type of axe required to cut down trees at once. Requires axeNeeded to be set to true.\n" +
+        "Options:\n" +
+        "-1 = allow any axe.\n" +
+        "1 = wooden axe.\n" +
+        "2 = stone axe.\n" +
+        "3 = iron axe.\n" +
+        "4 = golden axe.\n" +
+        "5 = diamond axe.\n"+
+        "6 = netherite axe.\n";
 
 	private static final String STRG_DAMAGE_AXE = "damage axe";
 	private boolean damageAxe = true;
@@ -507,7 +505,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "Invincible replant: " + textColor
 									+ (invincibleReplant ? "enabled" : "disabled"),
 							accentColor + "Axe Needed: " + textColor + (axeNeeded ? "yes" : "no"),
-							accentColor + "Axe Type Required: " + textColor + (AxeTypeInput.isValid(axeTypeRequired) ? axeTypeRequired : "disabled")
+							accentColor + "Axe Type Required: " + textColor + (AxeTypeInput.isValid(axeTypeRequired) ? axeTypeRequired : "disabled"),
 							accentColor + "Axe Damaged: " + textColor + (axeNeeded ? "yes" : "no"),
 							accentColor + "Damage Axe: " + textColor + (damageAxe ? "yes" : "no"),
 							accentColor + "Break Axe: " + textColor + (breakAxe ? "yes" : "no"),
