@@ -461,7 +461,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 									+ "Looks for changes in the configuration file and applies them.",
 							accentColor + "/" + label + " toggle <true/false>: " + textColor
 									+ "Toggles the plugin to work or not on you.",
-							accentColor + "/" + label + " values: " + textColor
+							accentColor + "/" + label + " settings: " + textColor
 									+ "Checks the values set in the configuration.",
 							accentColor + "/" + label + " setLimit <number>: " + textColor + DESC_MAX_BLOCKS,
 							accentColor + "/" + label + " setVipMode <true/false>: " + textColor + DESC_VIP_MODE,
@@ -476,7 +476,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "/" + label + " setStartActivated <true/false>: " + textColor
 									+ DESC_START_ACTIVATED,
 							accentColor + "/" + label + " setJoinMsg <true/false>: " + textColor + DESC_JOIN_MSG,
-							accentColor + "/" + label + " setIgnoreLeaves <true/false>: " + textColor + DESC_IGNORE_LEAVES
+							accentColor + "/" + label + " setIgnoreLeaves <true/false>: " + textColor + DESC_IGNORE_LEAVES,
+							accentColor + "/" + label + " setCrouchPrevention <true/false>: " + textColor + DESC_SNEAKING_PREVENTION,
 							});
 
 					break;
@@ -486,6 +487,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					break;
 
 				case "values":
+				case "settings":
 					sender.sendMessage(new String[] { header + "Values:",
 							accentColor + "Join Message: " + textColor + (joinMsg ? "show" : "not show"),
 							accentColor + "Starts Activated: " + textColor + (startActivated ? "yes" : "no"),
@@ -497,8 +499,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "Axe Needed: " + textColor + (axeNeeded ? "yes" : "no"),
 							accentColor + "Axe Damaged: " + textColor + (axeNeeded ? "yes" : "no"),
 							accentColor + "Damage Axe: " + textColor + (damageAxe ? "yes" : "no"),
-							accentColor + "Break Axe: " + textColor + (breakAxe ? "yes" : "no"), 
-							accentColor + "Ignore Leaves: " + textColor + (ignoreLeaves ? "yes" : "no"), 
+							accentColor + "Break Axe: " + textColor + (breakAxe ? "yes" : "no"),
+							accentColor + "Ignore Leaves: " + textColor + (ignoreLeaves ? "yes" : "no"),
+							accentColor + "Crouch Prevention: " + textColor + (sneakingPrevention ? "yes" : "no"),
 							});
 					break;
 
@@ -1068,7 +1071,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			}
 			list.add("toggle");
 			if (sender.hasPermission("cristreecapitator.admin")) {
-				list.add("values");
+				list.add("settings");
 				list.add("setLimit");
 				list.add("setVipMode");
 				list.add("setReplant");
@@ -1104,8 +1107,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				if ("toggle".startsWith(args[0]))
 					list.add("toggle");
 				if (sender.hasPermission("cristreecapitator.admin")) {
-					if ("values".startsWith(args[0]))
-						list.add("values");
+					if ("settings".startsWith(args[0]))
+						list.add("settings");
 					if ("setlimit".startsWith(args[0]))
 						list.add("setLimit");
 					if ("setvipmode".startsWith(args[0]))
