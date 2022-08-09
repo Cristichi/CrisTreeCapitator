@@ -234,6 +234,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		if (!tool.getType().name().contains("_AXE")) {
 			tool = null;
 		}
+		
+		if (!player.hasPermission("cristreecapitator.user")) {
+			return;
+		}
 
 		if (wg != null && !wg.createProtectionQuery().testBlockBreak(player, primero)) {
 			return;
