@@ -1,6 +1,6 @@
 name: CrisTreeCapitator
 main: main.TreeCapitator
-version: 6.3.1
+version: 6.3.2
 api-version: 1.13
 softdepend: [WorldGuard]
 commands:
@@ -14,12 +14,12 @@ permissions:
     description: Gives access to all Cristichi's Tree Capitator commands.
     children:
       cristreecapitator.admin: true
-      cristreecapitator.use: true
+      cristreecapitator.user: true
       cristreecapitator.vip: true
   cristreecapitator.admin:
     description: Allows you to change configuration values and update to the latest build.
     default: op
-  cristreecapitator.use:
+  cristreecapitator.user:
     description: Allows you to cut down trees faster! Quite faster in fact.
     default: true
   cristreecapitator.vip:
