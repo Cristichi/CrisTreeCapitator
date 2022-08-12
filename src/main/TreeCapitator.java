@@ -180,7 +180,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		ignoreLeaves = config.getBoolean(STRG_IGNORE_LEAVES, ignoreLeaves);
 		config.setInfo(STRG_IGNORE_LEAVES, DESC_IGNORE_LEAVES);
 
-		ignoreLeaves = config.getBoolean(STRG_SNEAKING_PREVENTION, sneakingPrevention);
+		sneakingPrevention = config.getBoolean(STRG_SNEAKING_PREVENTION, sneakingPrevention);
 		config.setInfo(STRG_SNEAKING_PREVENTION, DESC_SNEAKING_PREVENTION);
 	}
 
@@ -207,6 +207,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	@Override
 	public void onDisable() {
 		getLogger().info("Disabled");
+		saveConfig();
 	}
 
 	@EventHandler
@@ -490,6 +491,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					sender.sendMessage(header + getName() + " v" + desc.getVersion());
 					break;
 
+				case "config":
 				case "values":
 				case "settings":
 					sender.sendMessage(new String[] { header + "Values:",
