@@ -50,7 +50,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	private static final String STRG_MAX_BLOCKS = "destroy limit";
 	private int maxBlocks = -1;
-	private static final String DESC_MAX_BLOCKS = "Sets the maximun number of logs and leaves that can be destroyed at once. -1 to unlimit.";
+	private static final String DESC_MAX_BLOCKS = "Sets the maximum number of logs and leaves that can be destroyed at once. -1 to unlimit.";
 
 	private static final String STRG_VIP_MODE = "vip mode";
 	private boolean vipMode = false;
@@ -232,6 +232,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		final Material material = primero.getBlockData().getMaterial();
 		final Player player = e.getPlayer();
 		ItemStack tool = player.getInventory().getItemInMainHand();
+		
+		//Yes it could use some tuning
 		if (!tool.getType().name().contains("_AXE")) {
 			tool = null;
 		}
