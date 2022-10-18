@@ -1026,7 +1026,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 								sender.sendMessage(header + (sneakingPrevention.equals("true")
 										? accentColor + "Crouching" + textColor + " players will break only 1 log at a time."
 										: (sneakingPrevention.equals("false") ? accentColor + "Crouching won't affect"+textColor+" how players break logs."
-										: accentColor + "Only crouching" + textColor + " players will break only 1 log at a time.")));
+										: accentColor + "Only crouching" + textColor + " players will break 1 log at a time.")));
 							} catch (IOException e) {
 								sender.sendMessage(header + errorColor
 										+ "Error trying to save the value in the configuration file.");
