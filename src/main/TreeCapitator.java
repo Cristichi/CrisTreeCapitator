@@ -1025,8 +1025,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 								config.saveConfig();
 								sender.sendMessage(header + (sneakingPrevention.equals("true")
 										? accentColor + "Crouching" + textColor + " players will break only 1 log at a time."
-										: (sneakingPrevention.equals("false") ? accentColor + "Crouching won't affect "+textColor+"how players break logs."
-										: "Only crouching" + textColor + " players will break only 1 log at a time.")));
+										: (sneakingPrevention.equals("false") ? accentColor + "Crouching won't affect"+textColor+" how players break logs."
+										: accentColor + "Only crouching" + textColor + " players will break only 1 log at a time.")));
 							} catch (IOException e) {
 								sender.sendMessage(header + errorColor
 										+ "Error trying to save the value in the configuration file.");
@@ -1180,9 +1180,13 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			case "setignoreleaves":
 			case "setsneaking":
 			case "setcrouch":
+				list.add("true");
+				list.add("false");
+				break;
 			case "setsneakingprevention":
 			case "setcrouchprevention":
 				list.add("true");
+				list.add("inverted");
 				list.add("false");
 			default:
 				break;
