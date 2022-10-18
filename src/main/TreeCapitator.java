@@ -996,7 +996,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					if (sender.hasPermission("cristreecapitator.admin")) {
 						if (args.length != 2) {
 							sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
-									+ " <true/false/yes/no>" + textColor + ".");
+									+ " <true/false/yes/no/inv/inverted>" + textColor + ".");
 						} else {
 							switch (args[1]) {
 							case "true":
