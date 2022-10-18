@@ -97,8 +97,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private static final String DESC_IGNORE_LEAVES = "If true, leaves will not be destroyed and will not connect logs. In vanilla terrain forests this will prevent several trees to be cut down at once, but it will leave most big oak trees floating.";
 
 	private static final String STRG_SNEAKING_PREVENTION = "crouch for prevention";
-	private boolean sneakingPrevention = false;
-	private static final String DESC_SNEAKING_PREVENTION = "If true, crouching players won't trigger this plugin. False by default so update from previous versions won't change this behaviour without notice.";
+	private String sneakingPrevention = "false";
+	private static final String DESC_SNEAKING_PREVENTION = "If true, crouching players won't trigger this plugin or only crouching players will. If \"inverted\", players will have to crouch to destroy trees instantly. False by default so updating from previous versions won't change this behaviour without notice.";
 
 	// Messages
 	private final String joinMensajeActivated = header + "Remember " + accentColor + "{player}" + textColor
@@ -180,8 +180,13 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		ignoreLeaves = config.getBoolean(STRG_IGNORE_LEAVES, ignoreLeaves);
 		config.setInfo(STRG_IGNORE_LEAVES, DESC_IGNORE_LEAVES);
 
-		sneakingPrevention = config.getBoolean(STRG_SNEAKING_PREVENTION, sneakingPrevention);
+		String defaultSP = new String(sneakingPrevention);
+		sneakingPrevention = config.getString(STRG_SNEAKING_PREVENTION, defaultSP).toLowerCase();
 		config.setInfo(STRG_SNEAKING_PREVENTION, DESC_SNEAKING_PREVENTION);
+
+		if (!sneakingPrevention.equalsIgnoreCase("true") && !sneakingPrevention.equals("inverted") && !sneakingPrevention.equals("false")) {
+			sneakingPrevention = defaultSP;
+		}
 	}
 
 	private void saveConfiguration() {
@@ -246,7 +251,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			return;
 		}
 
-		if (sneakingPrevention && player.getPose().equals(Pose.SNEAKING)) {
+		if (sneakingPrevention.equals("true") && player.getPose().equals(Pose.SNEAKING)) {
+			return;
+		}
+		if (sneakingPrevention.equals("inverted") && !player.getPose().equals(Pose.SNEAKING)) {
 			return;
 		}
 		
@@ -509,7 +517,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "Damage Axe: " + textColor + (damageAxe ? "yes" : "no"),
 							accentColor + "Break Axe: " + textColor + (breakAxe ? "yes" : "no"),
 							accentColor + "Ignore Leaves: " + textColor + (ignoreLeaves ? "yes" : "no"),
-							accentColor + "Crouch Prevention: " + textColor + (sneakingPrevention ? "yes" : "no"),
+							accentColor + "Crouch Prevention: " + textColor + (sneakingPrevention.equals("true") ? "yes" : (sneakingPrevention.equals("false") ? "no" : "inverted")),
 							});
 					break;
 
@@ -993,25 +1001,32 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							switch (args[1]) {
 							case "true":
 							case "yes":
-								sneakingPrevention = true;
+								sneakingPrevention = "true";
 								break;
 							case "false":
 							case "no":
-								sneakingPrevention = false;
+								sneakingPrevention = "false";
+								break;
+							case "inv":
+							case "inverted":
+							case "reverse":
+							case "reversed":
+								sneakingPrevention = "inverted";
 								break;
 
 							default:
 								sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
-										+ " <true/false/yes/no>" + textColor + ". (" + accentColor + args[1] + textColor
+										+ " <true/false/yes/no/inv/inverted>" + textColor + ". (" + accentColor + args[1] + textColor
 										+ " is not a valid argument)");
 								break;
 							}
 							config.setValue(STRG_SNEAKING_PREVENTION, sneakingPrevention);
 							try {
 								config.saveConfig();
-								sender.sendMessage(header + (sneakingPrevention
-										? "Crouching " + accentColor + "will prevent " + textColor + "players from break more than 1 log at a time."
-										: "Crouching " + accentColor + "will not prevent " + textColor + "players from breaking all logs."));
+								sender.sendMessage(header + (sneakingPrevention.equals("true")
+										? accentColor + "Crouching" + textColor + " players will break only 1 log at a time."
+										: (sneakingPrevention.equals("false") ? accentColor + "Crouching won't affect "+textColor+"how players break logs."
+										: "Only crouching" + textColor + " players will break only 1 log at a time.")));
 							} catch (IOException e) {
 								sender.sendMessage(header + errorColor
 										+ "Error trying to save the value in the configuration file.");
