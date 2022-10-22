@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="TreeCapitator" default="makejar" basedir=".">
+<project name="CrisTreeCapitator" default="makejar" basedir=".">
     <target name="makejar" description="Create a jar for the project">
         <jar destfile="C:\Todo\MC Servers\Main 1.19.2 (WEBHELP)\plugins\${ant.project.name}.jar">
             <fileset dir="bin"></fileset>
