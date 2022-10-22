@@ -537,10 +537,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 						}
 						enabled = !enabled;
 						((Player) sender).setMetadata(PLAYER_ENABLE_META, new FixedMetadataValue(this, enabled));
-						sender.sendMessage(header + "Cristichi's Tree Capitator is now "
-								+ (enabled ? "enabled" : "disabled") + " for you.");
+						sender.sendMessage(header + " You "
+								+ (enabled ? "enabled" : "disabled") + " quick log destroy.");
 					} else {
-						sender.sendMessage(header + "This plugin can only be used for players");
+						sender.sendMessage(header + "This command can only be used by players");
 					}
 					break;
 
