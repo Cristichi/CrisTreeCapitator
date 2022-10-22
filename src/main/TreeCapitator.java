@@ -1253,7 +1253,6 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 				if (dmg >= maxDmg) {
 					if (breakAxe) {
-						player.sendMessage(header + "breakAxe: " + breakAxe);
 						tool.setAmount(0);
 						player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1, 1);
 					} else {
