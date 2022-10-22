@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="TreeCapitator" default="makejar" basedir=".">
+    <target name="makejar" description="Create a jar for the project">
+        <jar destfile="C:\Todo\MC Servers\Main 1.19.2 (WEBHELP)\plugins\${ant.project.name}.jar">
+            <fileset dir="bin"></fileset>
+            <fileset file="plugin.yml"></fileset>
+        </jar>
+        <jar destfile="C:/Todo/MC Servers/Pruebas/plugins/${ant.project.name}.jar">
+            <fileset dir="bin"></fileset>
+            <fileset file="plugin.yml"></fileset>
+        </jar>
+        <jar destfile="C:/Todo/MC Plugins/${ant.project.name}.jar">
+            <fileset dir="bin"></fileset>
+            <fileset file="plugin.yml"></fileset>
+        </jar>
+    </target>
+</project>

@@ -26,6 +26,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.json.simple.parser.ParseException;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
@@ -115,8 +116,12 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	public static boolean update = false;
 
 	private boolean checkUpdate() {
-		updater = new Updater(this, ID, this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false);
-		update = updater.getResult() == Updater.UpdateResult.UPDATE_AVAILABLE;
+		try {
+			updater = new Updater(this, ID, this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false);
+			update = updater.getResult() == Updater.UpdateResult.UPDATE_AVAILABLE;
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 
 		return update;
 	}
@@ -184,7 +189,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		sneakingPrevention = config.getString(STRG_SNEAKING_PREVENTION, defaultSP).toLowerCase();
 		config.setInfo(STRG_SNEAKING_PREVENTION, DESC_SNEAKING_PREVENTION);
 
-		if (!sneakingPrevention.equalsIgnoreCase("true") && !sneakingPrevention.equals("inverted") && !sneakingPrevention.equals("false")) {
+		if (!sneakingPrevention.equalsIgnoreCase("true") && !sneakingPrevention.equals("inverted")
+				&& !sneakingPrevention.equals("false")) {
 			sneakingPrevention = defaultSP;
 		}
 	}
@@ -237,12 +243,12 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		final Material material = primero.getBlockData().getMaterial();
 		final Player player = e.getPlayer();
 		ItemStack tool = player.getInventory().getItemInMainHand();
-		
-		//Yes it could use some tuning
+
+		// Yes it could use some tuning
 		if (!tool.getType().name().contains("_AXE")) {
 			tool = null;
 		}
-		
+
 		if (!player.hasPermission("cristreecapitator.user")) {
 			return;
 		}
@@ -257,7 +263,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		if (sneakingPrevention.equals("inverted") && !player.getPose().equals(Pose.SNEAKING)) {
 			return;
 		}
-		
+
 		if (player.getGameMode().equals(GameMode.SURVIVAL)) {
 			boolean enabled = startActivated;
 			List<MetadataValue> metas = player.getMetadata(PLAYER_ENABLE_META);
@@ -491,9 +497,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "/" + label + " setStartActivated <true/false>: " + textColor
 									+ DESC_START_ACTIVATED,
 							accentColor + "/" + label + " setJoinMsg <true/false>: " + textColor + DESC_JOIN_MSG,
-							accentColor + "/" + label + " setIgnoreLeaves <true/false>: " + textColor + DESC_IGNORE_LEAVES,
-							accentColor + "/" + label + " setCrouchPrevention <true/false>: " + textColor + DESC_SNEAKING_PREVENTION,
-							});
+							accentColor + "/" + label + " setIgnoreLeaves <true/false>: " + textColor
+									+ DESC_IGNORE_LEAVES,
+							accentColor + "/" + label + " setCrouchPrevention <true/false>: " + textColor
+									+ DESC_SNEAKING_PREVENTION, });
 
 					break;
 
@@ -517,8 +524,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "Damage Axe: " + textColor + (damageAxe ? "yes" : "no"),
 							accentColor + "Break Axe: " + textColor + (breakAxe ? "yes" : "no"),
 							accentColor + "Ignore Leaves: " + textColor + (ignoreLeaves ? "yes" : "no"),
-							accentColor + "Crouch Prevention: " + textColor + (sneakingPrevention.equals("true") ? "yes" : (sneakingPrevention.equals("false") ? "no" : "inverted")),
-							});
+							accentColor + "Crouch Prevention: " + textColor + (sneakingPrevention.equals("true") ? "yes"
+									: (sneakingPrevention.equals("false") ? "no" : "inverted")), });
 					break;
 
 				case "toggle":
@@ -974,9 +981,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							config.setValue(STRG_IGNORE_LEAVES, ignoreLeaves);
 							try {
 								config.saveConfig();
-								sender.sendMessage(header + (ignoreLeaves
-										? "Leaves will be " + accentColor + "left untouched"
-										: "Leaves will be " + accentColor + "removed"));
+								sender.sendMessage(
+										header + (ignoreLeaves ? "Leaves will be " + accentColor + "left untouched"
+												: "Leaves will be " + accentColor + "removed"));
 							} catch (IOException e) {
 								sender.sendMessage(header + errorColor
 										+ "Error trying to save the value in the configuration file.");
@@ -1016,17 +1023,21 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 							default:
 								sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
-										+ " <true/false/yes/no/inv/inverted>" + textColor + ". (" + accentColor + args[1] + textColor
-										+ " is not a valid argument)");
+										+ " <true/false/yes/no/inv/inverted>" + textColor + ". (" + accentColor
+										+ args[1] + textColor + " is not a valid argument)");
 								break;
 							}
 							config.setValue(STRG_SNEAKING_PREVENTION, sneakingPrevention);
 							try {
 								config.saveConfig();
 								sender.sendMessage(header + (sneakingPrevention.equals("true")
-										? accentColor + "Crouching" + textColor + " players will break only 1 log at a time."
-										: (sneakingPrevention.equals("false") ? accentColor + "Crouching won't affect"+textColor+" how players break logs."
-										: accentColor + "Only crouching" + textColor + " players will break 1 log at a time.")));
+										? accentColor + "Crouching" + textColor
+												+ " players will break only 1 log at a time."
+										: (sneakingPrevention.equals("false")
+												? accentColor + "Crouching won't affect" + textColor
+														+ " how players break logs."
+												: accentColor + "Only crouching" + textColor
+														+ " players will break 1 log at a time.")));
 							} catch (IOException e) {
 								sender.sendMessage(header + errorColor
 										+ "Error trying to save the value in the configuration file.");
@@ -1053,12 +1064,36 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					if (sender.hasPermission("cristreecapitator.admin")) {
 						if (checkUpdate()) {
 							sender.sendMessage(header + "Updating CrisTreeCapitator...");
+							try {
+								updater = new Updater(this, ID, this.getFile(), Updater.UpdateType.DEFAULT, true);
+								updater.getResult();
+								sender.sendMessage(
+										header + "Use " + accentColor + "/reload" + textColor + " to apply changes.");
+							} catch (ParseException e) {
+								sender.sendMessage(header + errorColor
+										+ "An internal error ocurred while trying to update: " + e.getMessage());
+								e.printStackTrace();
+							}
+						} else {
+							sender.sendMessage(header + "This plugin is already up to date.");
+						}
+					} else {
+						sinPermiso = true;
+					}
+
+					break;
+
+				case "forceupdate115935":
+					if (sender.hasPermission("cristreecapitator.admin")) {
+						try {
 							updater = new Updater(this, ID, this.getFile(), Updater.UpdateType.DEFAULT, true);
 							updater.getResult();
 							sender.sendMessage(
 									header + "Use " + accentColor + "/reload" + textColor + " to apply changes.");
-						} else {
-							sender.sendMessage(header + "This plugin is already up to date.");
+						} catch (ParseException e) {
+							sender.sendMessage(header + errorColor
+									+ "An internal error ocurred while trying to update: " + e.getMessage());
+							e.printStackTrace();
 						}
 					} else {
 						sinPermiso = true;

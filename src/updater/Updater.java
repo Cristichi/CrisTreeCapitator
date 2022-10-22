@@ -11,17 +11,20 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.json.simple.parser.ParseException;
 
 /**
  * Check for updates on BukkitDev for a given plugin, and download the updates if needed.
@@ -194,8 +197,9 @@ public class Updater {
      * @param file     The file that the plugin is running from, get this by doing this.getFile() from within your main class.
      * @param type     Specify the type of update this will be. See {@link UpdateType}
      * @param announce True if the program should announce the progress of new updates in console.
+     * @throws ParseException 
      */
-    public Updater(Plugin plugin, int id, File file, UpdateType type, boolean announce) {
+    public Updater(Plugin plugin, int id, File file, UpdateType type, boolean announce) throws ParseException {
         this(plugin, id, file, type, null, announce);
     }
 
@@ -207,8 +211,9 @@ public class Updater {
      * @param file     The file that the plugin is running from, get this by doing this.getFile() from within your main class.
      * @param type     Specify the type of update this will be. See {@link UpdateType}
      * @param callback The callback instance to notify when the Updater has finished
+     * @throws ParseException 
      */
-    public Updater(Plugin plugin, int id, File file, UpdateType type, UpdateCallback callback) {
+    public Updater(Plugin plugin, int id, File file, UpdateType type, UpdateCallback callback) throws ParseException {
         this(plugin, id, file, type, callback, false);
     }
 
@@ -221,8 +226,9 @@ public class Updater {
      * @param type     Specify the type of update this will be. See {@link UpdateType}
      * @param callback The callback instance to notify when the Updater has finished
      * @param announce True if the program should announce the progress of new updates in console.
+     * @throws ParseException 
      */
-    public Updater(Plugin plugin, int id, File file, UpdateType type, UpdateCallback callback, boolean announce) {
+    public Updater(Plugin plugin, int id, File file, UpdateType type, UpdateCallback callback, boolean announce) throws ParseException {
         this.plugin = plugin;
         this.type = type;
         this.announce = announce;
@@ -236,9 +242,9 @@ public class Updater {
         final File updaterConfigFile = new File(updaterFile, "config.yml");
 
         YamlConfiguration config = new YamlConfiguration();
-        config.options().header("This configuration file affects all plugins using the Updater system (version 2+ - http://forums.bukkit.org/threads/96681/ )" + '\n'
+        config.options().setHeader(Arrays.asList("This configuration file affects all plugins using the Updater system (version 2+ - http://forums.bukkit.org/threads/96681/ )" + '\n'
                 + "If you wish to use your API key, read http://wiki.bukkit.org/ServerMods_API and place it below." + '\n'
-                + "Some updating systems will not adhere to the disabled value, but these may be turned off in their plugin's configuration.");
+                + "Some updating systems will not adhere to the disabled value, but these may be turned off in their plugin's configuration."));
         config.addDefault(API_KEY_CONFIG_KEY, API_KEY_DEFAULT);
         config.addDefault(DISABLE_CONFIG_KEY, DISABLE_DEFAULT);
 
@@ -676,8 +682,9 @@ public class Updater {
      * Make a connection to the BukkitDev API and request the newest file's details.
      *
      * @return true if successful.
+     * @throws ParseException 
      */
-    private boolean read() {
+    private boolean read() throws ParseException {
         try {
             final URLConnection conn = this.url.openConnection();
             conn.setConnectTimeout(5000);
@@ -692,7 +699,7 @@ public class Updater {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             final String response = reader.readLine();
 
-            final JSONArray array = (JSONArray) JSONValue.parse(response);
+            final JSONArray array = (JSONArray) JSONValue.parseWithException(response);
 
             if (array.isEmpty()) {
                 this.plugin.getLogger().warning("The updater could not find any files for the project id " + this.id);
@@ -759,11 +766,16 @@ public class Updater {
     private class UpdateRunnable implements Runnable {
         @Override
         public void run() {
-            runUpdater();
+            try {
+				runUpdater();
+			} catch (ParseException e) {
+				Bukkit.getLogger().log(Level.WARNING, "Updater could not update Cristichi's Tree Capitator.");
+				e.printStackTrace();
+			}
         }
     }
 
-    private void runUpdater() {
+    private void runUpdater() throws ParseException {
         if (this.url != null && (this.read() && this.versionCheck())) {
             // Obtain the results of the project's file feed
             if ((this.versionLink != null) && (this.type != UpdateType.NO_DOWNLOAD)) {
