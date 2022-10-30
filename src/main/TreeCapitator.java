@@ -1189,7 +1189,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					if ("setdamageaxe".startsWith(args[0]))
 						list.add("setDamageAxe");
 					if ("setbreakaxe".startsWith(args[0]))
-						list.add("setBreakAxes");
+						list.add("setBreakAxe");
 					if ("setnethertrees".startsWith(args[0]))
 						list.add("setNetherTrees");
 					if ("setstartactivated".startsWith(args[0]))
@@ -1331,9 +1331,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			treeMap.remove(Material.WARPED_STEM);
 			treeMap.remove(Material.CRIMSON_STEM);
 		}
-
-		Bukkit.getLogger().info("canPlant("+below.getType()+", "+woodType+") = " + treeMap.getOrDefault(woodType, new ArrayList<>(0)).contains(below.getType()));
-
+		
 		return treeMap.getOrDefault(woodType, new ArrayList<>(0)).contains(below.getType());
 	}
 }
