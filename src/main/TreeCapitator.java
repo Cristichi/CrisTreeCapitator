@@ -83,6 +83,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private static final String STRG_INVINCIBLE_REPLANT = "invincible replant";
 	private boolean invincibleReplant = false;
 	private static final String DESC_INVINCIBLE_REPLANT = "Sets if saplings replanted by this plugin should be unbreakable by regular players (including the block beneath).";
+	private static final String META_INV_REPL = "inv_repl";
 
 	private static final String STRG_ADMIT_NETHER_TREES = "cut nether \"trees\"";
 	private boolean admitNetherTrees = false;
@@ -249,7 +250,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		ItemStack tool = player.getInventory().getItemInMainHand();
 
 		if (invincibleReplant) {
-			List<MetadataValue> fbbReplantMetas = firstBrokenB.getMetadata(STRG_INVINCIBLE_REPLANT);
+			List<MetadataValue> fbbReplantMetas = firstBrokenB.getMetadata(META_INV_REPL);
 			for (MetadataValue replantMeta : fbbReplantMetas) {
 				if (replantMeta.asBoolean()) {
 					long actual = System.currentTimeMillis();
@@ -259,6 +260,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							player.sendMessage(header + "You broke a protected sapling.");
 							player.setMetadata("msged", new FixedMetadataValue(this, actual));
 						}
+						firstBrokenB.removeMetadata(META_INV_REPL, this);
 					} else {
 						List<MetadataValue> metasMsg = player.getMetadata("msged");
 						if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
@@ -427,7 +429,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				
 			} else {
 				if (damageItem(player, tool, material)) {
-					stop = true;
+					return destroyed;
 				} else {
 					if (lego.breakNaturally()) {
 						destroyed++;
