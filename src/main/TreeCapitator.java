@@ -249,7 +249,11 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		final Player player = event.getPlayer();
 		ItemStack tool = player.getInventory().getItemInMainHand();
 
-		if (invincibleReplant) {
+		if (invincibleReplant && !(canPlant(
+				firstBrokenB.getWorld().getBlockAt(firstBrokenB.getX(), firstBrokenB.getY() - 1, firstBrokenB.getZ()),
+				material)
+				|| canPlant(firstBrokenB, firstBrokenB.getWorld()
+						.getBlockAt(firstBrokenB.getX(), firstBrokenB.getY() + 1, firstBrokenB.getZ()).getType()))) {
 			List<MetadataValue> fbbReplantMetas = firstBrokenB.getMetadata(META_INV_REPL);
 			for (MetadataValue replantMeta : fbbReplantMetas) {
 				if (replantMeta.asBoolean()) {
@@ -257,8 +261,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					if (player.hasPermission("cristreecapitator.admin")) {
 //						List<MetadataValue> metasMsg = player.getMetadata("msged");
 //						if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
-							player.sendMessage(header + "You broke a protected sapling.");
-							player.setMetadata("msged", new FixedMetadataValue(this, actual));
+						player.sendMessage(header + "You broke a protected sapling.");
+						player.setMetadata("msged", new FixedMetadataValue(this, actual));
 //						}
 						firstBrokenB.removeMetadata(META_INV_REPL, this);
 					} else {
@@ -273,6 +277,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				}
 			}
 		}
+		firstBrokenB.removeMetadata(META_INV_REPL, this);
 
 		if ((wg != null && !wg.createProtectionQuery().testBlockBreak(player, firstBrokenB))
 				|| (sneakingPrevention.equals("true") && player.getPose().equals(Pose.SNEAKING))
@@ -426,7 +431,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 						return destroyed;
 					}
 				}
-				
+
 			} else {
 				if (damageItem(player, tool, material)) {
 					return destroyed;
@@ -1318,9 +1323,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			for (Material wood : new Material[] { Material.OAK_LOG, Material.SPRUCE_LOG, Material.ACACIA_LOG,
 					Material.AZALEA, Material.BIRCH_LOG, Material.JUNGLE_LOG, Material.MANGROVE_LOG }) {
 				treeMap.put(wood,
-						new ArrayList<>(Arrays.asList(Material.DIRT, Material.GRASS_BLOCK, Material.COARSE_DIRT, Material.PODZOL,
-								Material.MYCELIUM, Material.ROOTED_DIRT, Material.MOSS_BLOCK, Material.FARMLAND,
-								Material.MUD)));
+						new ArrayList<>(Arrays.asList(Material.DIRT, Material.GRASS_BLOCK, Material.COARSE_DIRT,
+								Material.PODZOL, Material.MYCELIUM, Material.ROOTED_DIRT, Material.MOSS_BLOCK,
+								Material.FARMLAND, Material.MUD)));
 			}
 
 			treeMap.get(Material.MANGROVE_LOG).add(Material.CLAY);
@@ -1333,7 +1338,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			treeMap.remove(Material.WARPED_STEM);
 			treeMap.remove(Material.CRIMSON_STEM);
 		}
-		
+
 		return treeMap.getOrDefault(woodType, new ArrayList<>(0)).contains(below.getType());
 	}
 }
