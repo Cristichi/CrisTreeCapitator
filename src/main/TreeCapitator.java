@@ -1170,44 +1170,44 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				break;
 
 			default:
-				if ("help".startsWith(args[0]))
+				if ("help".contains(args[0]))
 					list.add("help");
 				if (sender.hasPermission("cristreecapitator.admin")) {
-					if ("update".startsWith(args[0]))
+					if ("update".contains(args[0]))
 						list.add("update");
-					if ("reload".startsWith(args[0]))
+					if ("reload".contains(args[0]))
 						list.add("reload");
 				}
-				if ("toggle".startsWith(args[0]))
+				if ("toggle".contains(args[0]))
 					list.add("toggle");
 				if (sender.hasPermission("cristreecapitator.admin")) {
-					if ("settings".startsWith(args[0]))
+					if ("settings".contains(args[0]))
 						list.add("settings");
-					if ("setlimit".startsWith(args[0]))
+					if ("setlimit".contains(args[0]))
 						list.add("setLimit");
-					if ("setvipmode".startsWith(args[0]))
+					if ("setvipmode".contains(args[0]))
 						list.add("setVipMode");
-					if ("setreplant".startsWith(args[0]))
+					if ("setreplant".contains(args[0]))
 						list.add("setReplant");
-					if ("setinvinciblereplant".startsWith(args[0]))
+					if ("setinvinciblereplant".contains(args[0]))
 						list.add("setInvincibleReplant");
-					if ("setaxeneeded".startsWith(args[0]))
+					if ("setaxeneeded".contains(args[0]))
 						list.add("setAxeNeeded");
-					if ("setdamageaxe".startsWith(args[0]))
+					if ("setdamageaxe".contains(args[0]))
 						list.add("setDamageAxe");
-					if ("setbreakaxe".startsWith(args[0]))
+					if ("setbreakaxe".contains(args[0]))
 						list.add("setBreakAxe");
-					if ("setnethertrees".startsWith(args[0]))
+					if ("setnethertrees".contains(args[0]))
 						list.add("setNetherTrees");
-					if ("setstartactivated".startsWith(args[0]))
+					if ("setstartactivated".contains(args[0]))
 						list.add("setStartActivated");
-					if ("setjoinmsg".startsWith(args[0]))
+					if ("setjoinmsg".contains(args[0]))
 						list.add("setJoinMsg");
-					if ("setignoreleaves".startsWith(args[0]))
+					if ("setignoreleaves".contains(args[0]))
 						list.add("setIgnoreLeaves");
-					if ("setcrouchprevention".startsWith(args[0]))
+					if ("setcrouchprevention".contains(args[0]))
 						list.add("setCrouchPrevention");
-					if ("setsneakingprevention".startsWith(args[0]))
+					if ("setsneakingprevention".contains(args[0]))
 						list.add("setSneakingPrevention");
 				}
 				break;
