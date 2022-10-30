@@ -2,8 +2,12 @@ package main;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -12,6 +16,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
 import org.bukkit.event.EventHandler;
@@ -19,7 +24,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -238,82 +242,75 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	}
 
 	@EventHandler
-	private void onBlockBreak(BlockBreakEvent e) {
-		final Block primero = e.getBlock();
-		final Material material = primero.getBlockData().getMaterial();
-		final Player player = e.getPlayer();
+	private void onBlockBreak(BlockBreakEvent event) {
+		final Block firstBrokenB = event.getBlock();
+		final Material material = firstBrokenB.getBlockData().getMaterial();
+		final Player player = event.getPlayer();
 		ItemStack tool = player.getInventory().getItemInMainHand();
 
-		// Yes it could use some tuning
-		if (!tool.getType().name().contains("_AXE")) {
-			tool = null;
-		}
-
-		if (!player.hasPermission("cristreecapitator.user")) {
-			return;
-		}
-
-		if (wg != null && !wg.createProtectionQuery().testBlockBreak(player, primero)) {
-			return;
-		}
-
-		if (sneakingPrevention.equals("true") && player.getPose().equals(Pose.SNEAKING)) {
-			return;
-		}
-		if (sneakingPrevention.equals("inverted") && !player.getPose().equals(Pose.SNEAKING)) {
-			return;
-		}
-
-		if (player.getGameMode().equals(GameMode.SURVIVAL)) {
-			boolean enabled = startActivated;
-			List<MetadataValue> metas = player.getMetadata(PLAYER_ENABLE_META);
-			for (MetadataValue meta : metas) {
-				enabled = meta.asBoolean();
+		if (invincibleReplant) {
+			List<MetadataValue> fbbReplantMetas = firstBrokenB.getMetadata(STRG_INVINCIBLE_REPLANT);
+			for (MetadataValue replantMeta : fbbReplantMetas) {
+				if (replantMeta.asBoolean()) {
+					long actual = System.currentTimeMillis();
+					if (player.hasPermission("cristreecapitator.admin")) {
+						List<MetadataValue> metasMsg = player.getMetadata("msged");
+						if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
+							player.sendMessage(header + "You broke a protected sapling.");
+							player.setMetadata("msged", new FixedMetadataValue(this, actual));
+						}
+					} else {
+						List<MetadataValue> metasMsg = player.getMetadata("msged");
+						if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
+							player.sendMessage(header + "This sapling is protected, please don't try to break it.");
+							player.setMetadata("msged", new FixedMetadataValue(this, actual));
+						}
+						event.setCancelled(true);
+					}
+					return;
+				}
 			}
+		}
 
-			if (enabled && !e.isCancelled() && (vipMode && player.hasPermission("cristreecapitator.vip") || !vipMode)
-					&& (isLog(material))) {
-				try {
-					boolean cutDown = true;
-					if (axeNeeded) {
-						PlayerInventory inv = player.getInventory();
-						ItemStack hand = inv.getItemInMainHand();
-						if (!hand.getType().name().contains("_AXE")) {
-							cutDown = false;
-						}
-					}
-					if (cutDown) {
-						if (replant) {
-							breakRecReplant(player, tool, primero, material, 0, false);
-						} else {
-							breakRecNoReplant(player, tool, primero, material, 0, false);
-						}
-						e.setCancelled(true);
-					}
-				} catch (StackOverflowError e1) {
+		if ((wg != null && !wg.createProtectionQuery().testBlockBreak(player, firstBrokenB))
+				|| (sneakingPrevention.equals("true") && player.getPose().equals(Pose.SNEAKING))
+				|| (sneakingPrevention.equals("inverted") && !player.getPose().equals(Pose.SNEAKING))
+				|| (!player.getGameMode().equals(GameMode.SURVIVAL))) {
+			return;
+		}
+
+		boolean enabled = startActivated;
+		List<MetadataValue> metas = player.getMetadata(PLAYER_ENABLE_META);
+		for (MetadataValue meta : metas) {
+			enabled = meta.asBoolean();
+		}
+
+		if (enabled && !event.isCancelled() && isLog(material) && player.hasPermission("cristreecapitator.user")
+				&& (vipMode && player.hasPermission("cristreecapitator.vip") || !vipMode)) {
+			try {
+				// Yes it could use some tuning
+				if (!tool.getType().name().contains("_AXE")) {
+					tool = null;
 				}
-			} else if (invincibleReplant) {
-				List<MetadataValue> metasReplant = primero.getMetadata(STRG_INVINCIBLE_REPLANT);
-				for (MetadataValue metareplant : metasReplant) {
-					if (metareplant.asBoolean()) {
-						long actual = System.currentTimeMillis();
-						if (player.hasPermission("cristreecapitator.admin")) {
-							List<MetadataValue> metasMsg = player.getMetadata("msged");
-							if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
-								player.sendMessage(header + "You broke a protected block.");
-								player.setMetadata("msged", new FixedMetadataValue(TreeCapitator.this, actual));
-							}
-						} else {
-							List<MetadataValue> metasMsg = player.getMetadata("msged");
-							if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
-								player.sendMessage(header + "This sapling is protected, please don't try to break it.");
-								player.setMetadata("msged", new FixedMetadataValue(TreeCapitator.this, actual));
-							}
-							e.setCancelled(true);
-						}
-						break;
+
+				boolean cutDown = true;
+				if (axeNeeded && tool != null) {
+					if (!tool.getType().name().contains("_AXE") || (tool.hasItemMeta()
+							&& tool.getItemMeta() instanceof Damageable
+							&& ((Damageable) tool.getItemMeta()).getDamage() >= tool.getType().getMaxDurability())) {
+						cutDown = false;
 					}
 				}
+				if (cutDown) {
+					if (replant) {
+						breakRecReplant(player, tool, firstBrokenB, material, 0, false);
+					} else {
+						breakRecNoReplant(player, tool, firstBrokenB, material, 0, false);
+					}
+					event.setCancelled(true);
+				}
+			} catch (StackOverflowError e) {
+				Bukkit.getLogger().throwing("TreeCapitator.java", "onBlockBreak(Event)", e);
 			}
 		}
 
@@ -370,52 +367,64 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	}
 
 	private int breakRecReplant(Player player, ItemStack tool, Block lego, Material type, int destroyed, boolean stop) {
-		if ((wg != null && !wg.createProtectionQuery().testBlockBreak(player, lego)) || stop)
+		if ((wg != null && !wg.createProtectionQuery().testBlockBreak(player, lego)) || stop
+				|| (maxBlocks > 0 && destroyed > maxBlocks))
 			return destroyed;
 		Material material = lego.getBlockData().getMaterial();
 		if (isLog(material) || isLeaves(material)) {
-			if (maxBlocks > 0 && destroyed > maxBlocks) {
-				return destroyed;
-			}
 			World mundo = lego.getWorld();
 			int x = lego.getX(), y = lego.getY(), z = lego.getZ();
 			Block below = mundo.getBlockAt(x, y - 1, z);
-			if (isDirt(below)) {
+
+			if (canPlant(below, lego.getType())) {
+				Material saplingType = null;
 				switch (lego.getType()) {
 				case ACACIA_LOG:
-					lego.setType(Material.ACACIA_SAPLING);
+					saplingType = Material.ACACIA_SAPLING;
 					break;
 				case BIRCH_LOG:
-					lego.setType(Material.BIRCH_SAPLING);
+					saplingType = Material.BIRCH_SAPLING;
 					break;
 				case DARK_OAK_LOG:
-					lego.setType(Material.DARK_OAK_SAPLING);
+					saplingType = Material.DARK_OAK_SAPLING;
 					break;
 				case JUNGLE_LOG:
-					lego.setType(Material.JUNGLE_SAPLING);
+					saplingType = Material.JUNGLE_SAPLING;
 					break;
 				case OAK_LOG:
-					lego.setType(Material.OAK_SAPLING);
+					saplingType = Material.OAK_SAPLING;
 					break;
 				case SPRUCE_LOG:
-					lego.setType(Material.SPRUCE_SAPLING);
+					saplingType = Material.SPRUCE_SAPLING;
+					break;
+				case MANGROVE_LOG:
+					saplingType = Material.MANGROVE_PROPAGULE;
+					break;
+				case CRIMSON_STEM:
+					saplingType = Material.CRIMSON_FUNGUS;
+					break;
+				case WARPED_STEM:
+					saplingType = Material.WARPED_FUNGUS;
 					break;
 				default:
-					if (damageItem(player, tool, material)) {
-						return destroyed;
-					} else {
-						if (lego.breakNaturally()) {
-							destroyed++;
-						} else {
-							return destroyed;
-						}
-					}
 					break;
 				}
-				if (replant) {
-					lego.setMetadata(STRG_INVINCIBLE_REPLANT, new FixedMetadataValue(this, true));
-					below.setMetadata(STRG_INVINCIBLE_REPLANT, new FixedMetadataValue(this, true));
+
+				if (damageItem(player, tool, material)) {
+					return destroyed;
+				} else {
+					if (lego.breakNaturally()) {
+						if (saplingType != null) {
+							lego.setType(saplingType);
+							lego.setMetadata(STRG_INVINCIBLE_REPLANT, new FixedMetadataValue(this, true));
+							below.setMetadata(STRG_INVINCIBLE_REPLANT, new FixedMetadataValue(this, true));
+						}
+						destroyed++;
+					} else {
+						return destroyed;
+					}
 				}
+				
 			} else {
 				if (damageItem(player, tool, material)) {
 					stop = true;
@@ -537,8 +546,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 						}
 						enabled = !enabled;
 						((Player) sender).setMetadata(PLAYER_ENABLE_META, new FixedMetadataValue(this, enabled));
-						sender.sendMessage(header + " You "
-								+ (enabled ? "enabled" : "disabled") + " quick log destroy.");
+						sender.sendMessage(
+								header + " You " + (enabled ? "enabled" : "disabled") + " quick log destroy.");
 					} else {
 						sender.sendMessage(header + "This command can only be used by players");
 					}
@@ -1248,7 +1257,19 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				short maxDmg = tool.getType().getMaxDurability();
 				Damageable damageable = (Damageable) meta;
 				int dmg = damageable.getDamage();
-				damageable.setDamage(++dmg);
+
+				// damageable.setDamage(++dmg);
+				// Substituted for the following code by exwundee (https://github.com/exwundee)
+				// This adds support for any level of the Durability enchantment
+				{
+					Random rand = new Random();
+
+					int unbLevel = tool.getEnchantmentLevel(Enchantment.DURABILITY);
+
+					if (rand.nextInt(unbLevel + 1) == 0) {
+						damageable.setDamage(++dmg);
+					}
+				}
 				tool.setItemMeta((ItemMeta) damageable);
 
 				if (dmg >= maxDmg) {
@@ -1267,9 +1288,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	}
 
 	private boolean isLog(Material mat) {
-		boolean ret = mat.name().contains("LOG");
+		boolean ret = !mat.name().contains("STRIPPED_") && mat.name().contains("_LOG");
 		if (!ret && admitNetherTrees)
-			return ret || mat.name().equals("CRIMSON_STEM") || mat.name().equals("WARPED_STEM");
+			return mat.name().equals("CRIMSON_STEM") || mat.name().equals("WARPED_STEM");
 		return ret;
 	}
 
@@ -1283,8 +1304,36 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		return ret;
 	}
 
-	private boolean isDirt(Block below) {
-		return below.getType().equals(Material.DIRT) || below.getType().equals(Material.GRASS_BLOCK)
-				|| below.getType().equals(Material.PODZOL);
+	/**
+	 * <Block below, Log material>
+	 */
+	private HashMap<Material, List<Material>> treeMap;
+
+	private boolean canPlant(Block below, Material woodType) {
+		if (treeMap == null) {
+			treeMap = new HashMap<>(10);
+
+			for (Material wood : new Material[] { Material.OAK_LOG, Material.SPRUCE_LOG, Material.ACACIA_LOG,
+					Material.AZALEA, Material.BIRCH_LOG, Material.JUNGLE_LOG, Material.MANGROVE_LOG }) {
+				treeMap.put(wood,
+						new ArrayList<>(Arrays.asList(Material.DIRT, Material.GRASS_BLOCK, Material.COARSE_DIRT, Material.PODZOL,
+								Material.MYCELIUM, Material.ROOTED_DIRT, Material.MOSS_BLOCK, Material.FARMLAND,
+								Material.MUD)));
+			}
+
+			treeMap.get(Material.MANGROVE_LOG).add(Material.CLAY);
+		}
+
+		if (admitNetherTrees && !treeMap.containsKey(Material.WARPED_STEM)) {
+			treeMap.put(Material.WARPED_STEM, Arrays.asList(Material.WARPED_NYLIUM));
+			treeMap.put(Material.CRIMSON_STEM, Arrays.asList(Material.CRIMSON_NYLIUM));
+		} else if (!admitNetherTrees && treeMap.containsKey(Material.WARPED_STEM)) {
+			treeMap.remove(Material.WARPED_STEM);
+			treeMap.remove(Material.CRIMSON_STEM);
+		}
+
+		Bukkit.getLogger().info("canPlant("+below.getType()+", "+woodType+") = " + treeMap.getOrDefault(woodType, new ArrayList<>(0)).contains(below.getType()));
+
+		return treeMap.getOrDefault(woodType, new ArrayList<>(0)).contains(below.getType());
 	}
 }
