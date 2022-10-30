@@ -255,11 +255,11 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				if (replantMeta.asBoolean()) {
 					long actual = System.currentTimeMillis();
 					if (player.hasPermission("cristreecapitator.admin")) {
-						List<MetadataValue> metasMsg = player.getMetadata("msged");
-						if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
+//						List<MetadataValue> metasMsg = player.getMetadata("msged");
+//						if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
 							player.sendMessage(header + "You broke a protected sapling.");
 							player.setMetadata("msged", new FixedMetadataValue(this, actual));
-						}
+//						}
 						firstBrokenB.removeMetadata(META_INV_REPL, this);
 					} else {
 						List<MetadataValue> metasMsg = player.getMetadata("msged");
@@ -418,8 +418,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					if (lego.breakNaturally()) {
 						if (saplingType != null) {
 							lego.setType(saplingType);
-							lego.setMetadata(STRG_INVINCIBLE_REPLANT, new FixedMetadataValue(this, true));
-							below.setMetadata(STRG_INVINCIBLE_REPLANT, new FixedMetadataValue(this, true));
+							lego.setMetadata(META_INV_REPL, new FixedMetadataValue(this, true));
+							below.setMetadata(META_INV_REPL, new FixedMetadataValue(this, true));
 						}
 						destroyed++;
 					} else {
