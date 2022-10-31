@@ -1,4 +1,4 @@
-package updater;
+package objs;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
