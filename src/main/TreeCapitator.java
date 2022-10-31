@@ -262,6 +262,12 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 						player.sendMessage(header + "You broke a protected sapling.");
 						player.setMetadata("msged", new FixedMetadataValue(this, actual));
 						firstBrokenB.removeMetadata(META_INV_REPL, this);
+						firstBrokenB.getWorld()
+								.getBlockAt(firstBrokenB.getX(), firstBrokenB.getY() - 1, firstBrokenB.getZ())
+								.removeMetadata(META_INV_REPL, this);
+						firstBrokenB.getWorld()
+						.getBlockAt(firstBrokenB.getX(), firstBrokenB.getY() + 1, firstBrokenB.getZ())
+						.removeMetadata(META_INV_REPL, this);
 					} else {
 						List<MetadataValue> metasMsg = player.getMetadata("msged");
 						if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
@@ -275,6 +281,12 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			}
 		}
 		firstBrokenB.removeMetadata(META_INV_REPL, this);
+		firstBrokenB.getWorld()
+		.getBlockAt(firstBrokenB.getX(), firstBrokenB.getY() - 1, firstBrokenB.getZ())
+		.removeMetadata(META_INV_REPL, this);
+		firstBrokenB.getWorld()
+		.getBlockAt(firstBrokenB.getX(), firstBrokenB.getY() + 1, firstBrokenB.getZ())
+		.removeMetadata(META_INV_REPL, this);
 
 		if ((wg != null && !wg.createProtectionQuery().testBlockBreak(player, firstBrokenB))
 				|| (sneakingPrevention.equals("true") && player.getPose().equals(Pose.SNEAKING))
