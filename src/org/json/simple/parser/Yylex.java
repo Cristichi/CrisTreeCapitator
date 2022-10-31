@@ -2,6 +2,7 @@
 
 package org.json.simple.parser;
 
+@SuppressWarnings("unused")
 class Yylex {
 
   /** This character denotes the end of file */
@@ -244,7 +245,7 @@ class Yylex {
   private int zzEndRead;
 
   /** number of newlines encountered up to the start of the matched text */
-  private int yyline;
+private int yyline;
 
   /** the number of characters up to the start of the matched text */
   private int yychar;
