@@ -35,7 +35,7 @@ import org.json.simple.parser.ParseException;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
 import objs.Configuration;
-import updater.Updater;
+import objs.Updater;
 
 public class TreeCapitator extends JavaPlugin implements Listener {
 	private PluginDescriptionFile desc = getDescription();
