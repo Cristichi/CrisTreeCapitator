@@ -259,11 +259,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				if (replantMeta.asBoolean()) {
 					long actual = System.currentTimeMillis();
 					if (player.hasPermission("cristreecapitator.admin")) {
-//						List<MetadataValue> metasMsg = player.getMetadata("msged");
-//						if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
 						player.sendMessage(header + "You broke a protected sapling.");
 						player.setMetadata("msged", new FixedMetadataValue(this, actual));
-//						}
 						firstBrokenB.removeMetadata(META_INV_REPL, this);
 					} else {
 						List<MetadataValue> metasMsg = player.getMetadata("msged");
