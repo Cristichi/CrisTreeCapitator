@@ -266,8 +266,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 								.getBlockAt(firstBrokenB.getX(), firstBrokenB.getY() - 1, firstBrokenB.getZ())
 								.removeMetadata(META_INV_REPL, this);
 						firstBrokenB.getWorld()
-						.getBlockAt(firstBrokenB.getX(), firstBrokenB.getY() + 1, firstBrokenB.getZ())
-						.removeMetadata(META_INV_REPL, this);
+								.getBlockAt(firstBrokenB.getX(), firstBrokenB.getY() + 1, firstBrokenB.getZ())
+								.removeMetadata(META_INV_REPL, this);
 					} else {
 						List<MetadataValue> metasMsg = player.getMetadata("msged");
 						if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
@@ -281,12 +281,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			}
 		}
 		firstBrokenB.removeMetadata(META_INV_REPL, this);
-		firstBrokenB.getWorld()
-		.getBlockAt(firstBrokenB.getX(), firstBrokenB.getY() - 1, firstBrokenB.getZ())
-		.removeMetadata(META_INV_REPL, this);
-		firstBrokenB.getWorld()
-		.getBlockAt(firstBrokenB.getX(), firstBrokenB.getY() + 1, firstBrokenB.getZ())
-		.removeMetadata(META_INV_REPL, this);
+		firstBrokenB.getWorld().getBlockAt(firstBrokenB.getX(), firstBrokenB.getY() - 1, firstBrokenB.getZ())
+				.removeMetadata(META_INV_REPL, this);
+		firstBrokenB.getWorld().getBlockAt(firstBrokenB.getX(), firstBrokenB.getY() + 1, firstBrokenB.getZ())
+				.removeMetadata(META_INV_REPL, this);
 
 		if ((wg != null && !wg.createProtectionQuery().testBlockBreak(player, firstBrokenB))
 				|| (sneakingPrevention.equals("true") && player.getPose().equals(Pose.SNEAKING))
@@ -310,12 +308,12 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				}
 
 				boolean cutDown = true;
-				if (axeNeeded && tool != null) {
-					if (!tool.getType().name().contains("_AXE") || (tool.hasItemMeta()
-							&& tool.getItemMeta() instanceof Damageable
-							&& ((Damageable) tool.getItemMeta()).getDamage() >= tool.getType().getMaxDurability())) {
-						cutDown = false;
-					}
+				if (axeNeeded && (tool == null || !tool.getType().name().endsWith("_AXE"))) {
+					cutDown = false;
+				}
+				if (cutDown && axeNeeded && !breakAxe && (tool.hasItemMeta() && tool.getItemMeta() instanceof Damageable
+						&& ((Damageable) tool.getItemMeta()).getDamage() >= tool.getType().getMaxDurability())) {
+					cutDown = false;
 				}
 				if (cutDown) {
 					if (replant) {
