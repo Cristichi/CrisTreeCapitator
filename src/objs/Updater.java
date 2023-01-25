@@ -228,7 +228,8 @@ public class Updater {
      * @param announce True if the program should announce the progress of new updates in console.
      * @throws ParseException 
      */
-    public Updater(Plugin plugin, int id, File file, UpdateType type, UpdateCallback callback, boolean announce) throws ParseException {
+    @SuppressWarnings("deprecation")
+	public Updater(Plugin plugin, int id, File file, UpdateType type, UpdateCallback callback, boolean announce) throws ParseException {
         this.plugin = plugin;
         this.type = type;
         this.announce = announce;
@@ -242,9 +243,15 @@ public class Updater {
         final File updaterConfigFile = new File(updaterFile, "config.yml");
 
         YamlConfiguration config = new YamlConfiguration();
-        config.options().setHeader(Arrays.asList("This configuration file affects all plugins using the Updater system (version 2+ - http://forums.bukkit.org/threads/96681/ )" + '\n'
-                + "If you wish to use your API key, read http://wiki.bukkit.org/ServerMods_API and place it below." + '\n'
-                + "Some updating systems will not adhere to the disabled value, but these may be turned off in their plugin's configuration."));
+        try {
+        config.options().setHeader(Arrays.asList("This configuration file affects all plugins using the Updater system (version 2+ - http://forums.bukkit.org/threads/96681/ )",
+                "If you wish to use your API key, read http://wiki.bukkit.org/ServerMods_API and place it below.",
+                "Some updating systems will not adhere to the disabled value, but these may be turned off in their plugin's configuration."));
+        } catch(NoSuchMethodError e) {
+            config.options().header("This configuration file affects all plugins using the Updater system (version 2+ - http://forums.bukkit.org/threads/96681/ )" + '\n'
+                    + "If you wish to use your API key, read http://wiki.bukkit.org/ServerMods_API and place it below." + '\n'
+                    + "Some updating systems will not adhere to the disabled value, but these may be turned off in their plugin's configuration.");
+        }
         config.addDefault(API_KEY_CONFIG_KEY, API_KEY_DEFAULT);
         config.addDefault(DISABLE_CONFIG_KEY, DISABLE_DEFAULT);
 
