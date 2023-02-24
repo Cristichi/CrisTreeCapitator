@@ -1326,9 +1326,44 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private boolean canPlant(Block below, Material woodType) {
 		if (treeMap == null) {
 			treeMap = new HashMap<>(10);
-
-			for (Material wood : new Material[] { Material.OAK_LOG, Material.SPRUCE_LOG, Material.ACACIA_LOG,
-					Material.AZALEA, Material.BIRCH_LOG, Material.JUNGLE_LOG, Material.MANGROVE_LOG }) {
+			
+			ArrayList<Material> woods = new ArrayList<>(7);
+			try {
+				woods.add(Material.OAK_LOG);
+			} catch (NoSuchFieldError e) {
+				//Material doesn't exist in this version
+			}
+			try {
+				woods.add(Material.SPRUCE_LOG);
+			} catch (NoSuchFieldError e) {
+				//Material doesn't exist in this version
+			}
+			try {
+				woods.add(Material.ACACIA_LOG);
+			} catch (NoSuchFieldError e) {
+				//Material doesn't exist in this version
+			}
+			try {
+				woods.add(Material.AZALEA);
+			} catch (NoSuchFieldError e) {
+				//Material doesn't exist in this version
+			}
+			try {
+				woods.add(Material.BIRCH_LOG);
+			} catch (NoSuchFieldError e) {
+				//Material doesn't exist in this version
+			}
+			try {
+				woods.add(Material.JUNGLE_LOG);
+			} catch (NoSuchFieldError e) {
+				//Material doesn't exist in this version
+			}
+			try {
+				woods.add(Material.MANGROVE_LOG);
+			} catch (NoSuchFieldError e) {
+				//Material doesn't exist in this version
+			}
+			for (Material wood : woods ) {
 				treeMap.put(wood,
 						new ArrayList<>(Arrays.asList(Material.DIRT, Material.GRASS_BLOCK, Material.COARSE_DIRT,
 								Material.PODZOL, Material.MYCELIUM, Material.ROOTED_DIRT, Material.MOSS_BLOCK,
