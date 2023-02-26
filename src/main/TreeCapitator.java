@@ -1327,6 +1327,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		if (treeMap == null) {
 			treeMap = new HashMap<>(10);
 			
+			//Elegance is my passion /s
 			ArrayList<Material> woods = new ArrayList<>(7);
 			try {
 				woods.add(Material.OAK_LOG);
