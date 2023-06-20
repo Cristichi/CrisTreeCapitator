@@ -1182,6 +1182,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				case "reload":
 					if (sender.hasPermission("cristreecapitator.admin")) {
 						loadConfiguration();
+						loadExtraJSONs();
 						sender.sendMessage(header + "Configuration loaded from file.");
 					} else {
 						sinPermiso = true;
