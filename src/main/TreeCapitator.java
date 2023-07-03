@@ -505,6 +505,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			Block below = mundo.getBlockAt(x, y - 1, z);
 
 			if (canPlant(below, lego.getType())) {
+				System.out.println("replant type: "+lego.getType().name());
 				Material saplingType = null;
 				switch (lego.getType()) {
 				case ACACIA_LOG:
@@ -1463,6 +1464,11 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				// Material doesn't exist in this version
 			}
 			try {
+				woods.add(Material.DARK_OAK_LOG);
+			} catch (NoSuchFieldError e) {
+				// Material doesn't exist in this version
+			}
+			try {
 				woods.add(Material.SPRUCE_LOG);
 			} catch (NoSuchFieldError e) {
 				// Material doesn't exist in this version
@@ -1493,7 +1499,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				// Material doesn't exist in this version
 			}
 			try {
-				woods.add(Material.STRIPPED_CHERRY_LOG);
+				woods.add(Material.CHERRY_LOG);
 			} catch (NoSuchFieldError e) {
 				// Material doesn't exist in this version
 			}
