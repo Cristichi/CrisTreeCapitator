@@ -61,7 +61,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private Configuration config;
 	private File fExtraLogs;
 	private File fExtraLeaves;
-	
+
 	// Options
 	private static final String STRG_MAX_BLOCKS = "destroy limit";
 	private int maxBlocks = -1;
@@ -117,9 +117,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private static final String DESC_SNEAKING_PREVENTION = "If true, crouching players won't trigger this plugin or only crouching players will. If \"inverted\", players will have to crouch to destroy trees instantly. False by default so updating from previous versions won't change this behaviour without notice.";
 
 	// TODO Extra logs/leaves
-    private JSONParser parser = new JSONParser();
-	private Material[] extraLogs, extraLeaves;
-	
+	private JSONParser parser = new JSONParser();
+	private Material[] extraLogs = new Material[0], extraLeaves = new Material[0];
+
 	// Messages
 	private final String joinMensajeActivated = header + "Remember " + accentColor + "{player}" + textColor
 			+ ", you can use " + accentColor + "/tc toggle" + textColor + " to avoid breaking things made of logs.";
@@ -165,9 +165,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		config = new Configuration("plugins/CrisTreeCapitator/config.yml", "Cristichi's TreeCapitator");
 		loadConfiguration();
 		saveConfiguration();
-		
+
 		loadExtraJSONs();
-		
+
 		getLogger().info("Enabled");
 	}
 
@@ -216,31 +216,34 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			sneakingPrevention = defaultSP;
 		}
 	}
-	
+
 	private void loadExtraJSONs() {
 		fExtraLogs = new File("plugins/CrisTreeCapitator/extra_logs.json");
 		if (fExtraLogs.exists()) {
-	        try (FileReader reader = new FileReader(fExtraLogs)) {
-	            JSONObject jsonObject = (JSONObject) parser.parse(reader);
-	            JSONArray JArrayLogs = (JSONArray) jsonObject.get("logs");
-	            Object[] strExtraLogs = JArrayLogs.toArray();
-	            extraLogs = new Material[strExtraLogs.length];
-	            for (int i = 0; i < strExtraLogs.length; i++) {
+			try (FileReader reader = new FileReader(fExtraLogs)) {
+				JSONObject jsonObject = (JSONObject) parser.parse(reader);
+				JSONArray JArrayLogs = (JSONArray) jsonObject.get("logs");
+				Object[] strExtraLogs = JArrayLogs.toArray();
+				extraLogs = new Material[strExtraLogs.length];
+				for (int i = 0; i < strExtraLogs.length; i++) {
 					extraLogs[i] = Material.getMaterial(strExtraLogs[i].toString());
-					if (extraLogs[i]==null) {
-						getLogger().warning("Material \""+strExtraLogs[i]+"\" in extra_logs.json could not be recognized as any in-game Material.");
+					if (extraLogs[i] == null) {
+						getLogger().warning("Material \"" + strExtraLogs[i]
+								+ "\" in extra_logs.json could not be recognized as any in-game Material.");
 					}
 				}
-	            getLogger().log(Level.INFO, "Logs from JSON: "+Arrays.toString(extraLogs));
-	        } catch (IOException e) {
-				getLogger().warning("extra_logs.json could not be read. Only the default logs (+ nether) will be detected.");
+				getLogger().log(Level.INFO, "Logs from JSON: " + Arrays.toString(extraLogs));
+			} catch (IOException e) {
+				getLogger().warning(
+						"extra_logs.json could not be read. Only the default logs (+ nether) will be detected.");
 				getLogger().throwing(this.getClass().getCanonicalName(), "onEnable", e);
 				extraLogs = new Material[0];
-	        } catch (ParseException e) {
-				getLogger().warning("extra_logs.json is an invalid JSON. Please make sure the contents of the file are a valid JSON format. Only the default logs (+ nether) will be detected.");
+			} catch (ParseException e) {
+				getLogger().warning(
+						"extra_logs.json is an invalid JSON. Please make sure the contents of the file are a valid JSON format. Only the default logs (+ nether) will be detected.");
 				getLogger().throwing(this.getClass().getCanonicalName(), "onEnable", e);
 				extraLogs = new Material[0];
-	        }
+			}
 		} else {
 			try {
 				fExtraLogs.createNewFile();
@@ -251,11 +254,12 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				jsonArrayLogs.add("OAK_LOG");
 				jsonArrayLogs.add("OAK_LOG");
 				jsonData.put("logs", jsonArrayLogs);
-		        FileWriter fw = new FileWriter(fExtraLogs);
-		        fw.write(jsonData.toJSONString());
-		        fw.close();
+				FileWriter fw = new FileWriter(fExtraLogs);
+				fw.write(jsonData.toJSONString());
+				fw.close();
 			} catch (IOException e) {
-				getLogger().warning("extra_logs.json could not be created. Only the default logs (+ nether) will be detected.");
+				getLogger().warning(
+						"extra_logs.json could not be created. Only the default logs (+ nether) will be detected.");
 				getLogger().throwing(this.getClass().getCanonicalName(), "onEnable", e);
 				extraLogs = new Material[0];
 			}
@@ -263,27 +267,30 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 		fExtraLeaves = new File("plugins/CrisTreeCapitator/extra_leaves.json");
 		if (fExtraLeaves.exists()) {
-	        try (FileReader reader = new FileReader(fExtraLeaves)) {
-	            JSONObject jsonObject = (JSONObject) parser.parse(reader);
-	            JSONArray JArrayLeaves = (JSONArray) jsonObject.get("leaves");
-	            Object[] strExtraLeaves = JArrayLeaves.toArray();
-	            extraLeaves = new Material[strExtraLeaves.length];
-	            for (int i = 0; i < strExtraLeaves.length; i++) {
-	            	extraLeaves[i] = Material.getMaterial(strExtraLeaves[i].toString());
-					if (extraLeaves[i]==null) {
-						getLogger().warning("Material \""+strExtraLeaves[i]+"\" in extra_leaves.json could not be recognized as any in-game Material.");
+			try (FileReader reader = new FileReader(fExtraLeaves)) {
+				JSONObject jsonObject = (JSONObject) parser.parse(reader);
+				JSONArray JArrayLeaves = (JSONArray) jsonObject.get("leaves");
+				Object[] strExtraLeaves = JArrayLeaves.toArray();
+				extraLeaves = new Material[strExtraLeaves.length];
+				for (int i = 0; i < strExtraLeaves.length; i++) {
+					extraLeaves[i] = Material.getMaterial(strExtraLeaves[i].toString());
+					if (extraLeaves[i] == null) {
+						getLogger().warning("Material \"" + strExtraLeaves[i]
+								+ "\" in extra_leaves.json could not be recognized as any in-game Material.");
 					}
 				}
-	            getLogger().log(Level.INFO, "Leaves from JSON: "+Arrays.toString(extraLeaves));
-	        } catch (IOException e) {
-				getLogger().warning("extra_leaves.json could not be read. Only the default leaves (+ nether) will be detected.");
+				getLogger().log(Level.INFO, "Leaves from JSON: " + Arrays.toString(extraLeaves));
+			} catch (IOException e) {
+				getLogger().warning(
+						"extra_leaves.json could not be read. Only the default leaves (+ nether) will be detected.");
 				getLogger().throwing(this.getClass().getCanonicalName(), "onEnable", e);
 				extraLeaves = new Material[0];
-	        } catch (ParseException e) {
-				getLogger().warning("extra_leaves.json is an invalid JSON. Please make sure the contents of the file are a valid JSON format. Only the default leaves (+ nether) will be detected.");
+			} catch (ParseException e) {
+				getLogger().warning(
+						"extra_leaves.json is an invalid JSON. Please make sure the contents of the file are a valid JSON format. Only the default leaves (+ nether) will be detected.");
 				getLogger().throwing(this.getClass().getCanonicalName(), "onEnable", e);
 				extraLeaves = new Material[0];
-	        }
+			}
 		} else {
 			try {
 				fExtraLeaves.createNewFile();
@@ -294,13 +301,14 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				jsonArrayLeaves.add("OAK_LEAVES");
 				jsonArrayLeaves.add("OAK_LEAVES");
 				jsonData.put("leaves", jsonArrayLeaves);
-		        FileWriter fw = new FileWriter(fExtraLeaves);
-		        fw.write(jsonData.toJSONString());
-		        fw.close();
+				FileWriter fw = new FileWriter(fExtraLeaves);
+				fw.write(jsonData.toJSONString());
+				fw.close();
 			} catch (IOException e) {
-				getLogger().warning("extra_leaves.json could not be created. Only the default logs (+ nether) will be detected.");
+				getLogger().warning(
+						"extra_leaves.json could not be created. Only the default logs (+ nether) will be detected.");
 				getLogger().throwing(this.getClass().getCanonicalName(), "onEnable", e);
-				//Bukkit.getPluginManager().disablePlugin(this);
+				// Bukkit.getPluginManager().disablePlugin(this);
 				extraLeaves = new Material[0];
 			}
 		}
@@ -1446,50 +1454,50 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private boolean canPlant(Block below, Material woodType) {
 		if (treeMap == null) {
 			treeMap = new HashMap<>(10);
-			
-			//Elegance is my passion /s
+
+			// Elegance is my passion /s
 			ArrayList<Material> woods = new ArrayList<>(7);
 			try {
 				woods.add(Material.OAK_LOG);
 			} catch (NoSuchFieldError e) {
-				//Material doesn't exist in this version
+				// Material doesn't exist in this version
 			}
 			try {
 				woods.add(Material.SPRUCE_LOG);
 			} catch (NoSuchFieldError e) {
-				//Material doesn't exist in this version
+				// Material doesn't exist in this version
 			}
 			try {
 				woods.add(Material.ACACIA_LOG);
 			} catch (NoSuchFieldError e) {
-				//Material doesn't exist in this version
+				// Material doesn't exist in this version
 			}
 			try {
 				woods.add(Material.AZALEA);
 			} catch (NoSuchFieldError e) {
-				//Material doesn't exist in this version
+				// Material doesn't exist in this version
 			}
 			try {
 				woods.add(Material.BIRCH_LOG);
 			} catch (NoSuchFieldError e) {
-				//Material doesn't exist in this version
+				// Material doesn't exist in this version
 			}
 			try {
 				woods.add(Material.JUNGLE_LOG);
 			} catch (NoSuchFieldError e) {
-				//Material doesn't exist in this version
+				// Material doesn't exist in this version
 			}
 			try {
 				woods.add(Material.MANGROVE_LOG);
 			} catch (NoSuchFieldError e) {
-				//Material doesn't exist in this version
+				// Material doesn't exist in this version
 			}
 			try {
 				woods.add(Material.STRIPPED_CHERRY_LOG);
 			} catch (NoSuchFieldError e) {
-				//Material doesn't exist in this version
+				// Material doesn't exist in this version
 			}
-			for (Material wood : woods ) {
+			for (Material wood : woods) {
 				treeMap.put(wood,
 						new ArrayList<>(Arrays.asList(Material.DIRT, Material.GRASS_BLOCK, Material.COARSE_DIRT,
 								Material.PODZOL, Material.MYCELIUM, Material.ROOTED_DIRT, Material.MOSS_BLOCK,
