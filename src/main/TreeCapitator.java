@@ -526,6 +526,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				case WARPED_STEM:
 					saplingType = Material.WARPED_FUNGUS;
 					break;
+				case CHERRY_LOG:
+					saplingType = Material.CHERRY_SAPLING;
+					break;
 				default:
 					break;
 				}
@@ -1478,6 +1481,11 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			}
 			try {
 				woods.add(Material.MANGROVE_LOG);
+			} catch (NoSuchFieldError e) {
+				//Material doesn't exist in this version
+			}
+			try {
+				woods.add(Material.STRIPPED_CHERRY_LOG);
 			} catch (NoSuchFieldError e) {
 				//Material doesn't exist in this version
 			}
