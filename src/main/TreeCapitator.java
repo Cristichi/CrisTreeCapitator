@@ -505,7 +505,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			Block below = mundo.getBlockAt(x, y - 1, z);
 
 			if (canPlant(below, lego.getType())) {
-				System.out.println("replant type: "+lego.getType().name());
+				System.out.println("replant type: " + lego.getType().name());
 				Material saplingType = null;
 				switch (lego.getType()) {
 				case ACACIA_LOG:
@@ -1498,27 +1498,54 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			} catch (NoSuchFieldError e) {
 				// Material doesn't exist in this version
 			}
+			for (Material wood : woods) {
+				List<Material> plantSurfaces = Arrays.asList(Material.DIRT, Material.GRASS_BLOCK, Material.MYCELIUM,
+						Material.FARMLAND);
+				try {
+					plantSurfaces.add(Material.PODZOL);
+				} catch (NoSuchFieldError e) {
+					// Material doesn't exist in this version
+				}
+				try {
+					plantSurfaces.add(Material.MOSS_BLOCK);
+				} catch (NoSuchFieldError e) {
+					// Material doesn't exist in this version
+				}
+				try {
+					plantSurfaces.add(Material.ROOTED_DIRT);
+				} catch (NoSuchFieldError e) {
+					// Material doesn't exist in this version
+				}
+				try {
+					plantSurfaces.add(Material.COARSE_DIRT);
+				} catch (NoSuchFieldError e) {
+					// Material doesn't exist in this version
+				}
+				try {
+					plantSurfaces.add(Material.MUD);
+				} catch (NoSuchFieldError e) {
+					// Material doesn't exist in this version
+				}
+				treeMap.put(wood, new ArrayList<>(plantSurfaces));
+			}
+
 			try {
-				woods.add(Material.CHERRY_LOG);
+				treeMap.get(Material.MANGROVE_LOG).add(Material.CLAY);
 			} catch (NoSuchFieldError e) {
 				// Material doesn't exist in this version
 			}
-			for (Material wood : woods) {
-				treeMap.put(wood,
-						new ArrayList<>(Arrays.asList(Material.DIRT, Material.GRASS_BLOCK, Material.COARSE_DIRT,
-								Material.PODZOL, Material.MYCELIUM, Material.ROOTED_DIRT, Material.MOSS_BLOCK,
-								Material.FARMLAND, Material.MUD)));
-			}
-
-			treeMap.get(Material.MANGROVE_LOG).add(Material.CLAY);
 		}
 
-		if (admitNetherTrees && !treeMap.containsKey(Material.WARPED_STEM)) {
-			treeMap.put(Material.WARPED_STEM, Arrays.asList(Material.WARPED_NYLIUM));
-			treeMap.put(Material.CRIMSON_STEM, Arrays.asList(Material.CRIMSON_NYLIUM));
-		} else if (!admitNetherTrees && treeMap.containsKey(Material.WARPED_STEM)) {
-			treeMap.remove(Material.WARPED_STEM);
-			treeMap.remove(Material.CRIMSON_STEM);
+		try {
+			if (admitNetherTrees && !treeMap.containsKey(Material.WARPED_STEM)) {
+				treeMap.put(Material.WARPED_STEM, Arrays.asList(Material.WARPED_NYLIUM));
+				treeMap.put(Material.CRIMSON_STEM, Arrays.asList(Material.CRIMSON_NYLIUM));
+			} else if (!admitNetherTrees && treeMap.containsKey(Material.WARPED_STEM)) {
+				treeMap.remove(Material.WARPED_STEM);
+				treeMap.remove(Material.CRIMSON_STEM);
+			}
+		} catch (NoSuchFieldError e) {
+			// Material doesn't exist in this version
 		}
 
 		return treeMap.getOrDefault(woodType, new ArrayList<>(0)).contains(below.getType());
