@@ -505,7 +505,6 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			Block below = mundo.getBlockAt(x, y - 1, z);
 
 			if (canPlant(below, lego.getType())) {
-				System.out.println("replant type: " + lego.getType().name());
 				Material saplingType = null;
 				switch (lego.getType()) {
 				case ACACIA_LOG:
@@ -1460,42 +1459,42 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			ArrayList<Material> woods = new ArrayList<>(9);
 			try {
 				woods.add(Material.OAK_LOG);
-			} catch (NoSuchFieldError e) {
+			} catch (Exception | NoSuchFieldError e) {
 				// Material doesn't exist in this version
 			}
 			try {
 				woods.add(Material.DARK_OAK_LOG);
-			} catch (NoSuchFieldError e) {
+			} catch (Exception | NoSuchFieldError e) {
 				// Material doesn't exist in this version
 			}
 			try {
 				woods.add(Material.SPRUCE_LOG);
-			} catch (NoSuchFieldError e) {
+			} catch (Exception | NoSuchFieldError e) {
 				// Material doesn't exist in this version
 			}
 			try {
 				woods.add(Material.ACACIA_LOG);
-			} catch (NoSuchFieldError e) {
+			} catch (Exception | NoSuchFieldError e) {
 				// Material doesn't exist in this version
 			}
 			try {
 				woods.add(Material.AZALEA);
-			} catch (NoSuchFieldError e) {
+			} catch (Exception | NoSuchFieldError e) {
 				// Material doesn't exist in this version
 			}
 			try {
 				woods.add(Material.BIRCH_LOG);
-			} catch (NoSuchFieldError e) {
+			} catch (Exception | NoSuchFieldError e) {
 				// Material doesn't exist in this version
 			}
 			try {
 				woods.add(Material.JUNGLE_LOG);
-			} catch (NoSuchFieldError e) {
+			} catch (Exception | NoSuchFieldError e) {
 				// Material doesn't exist in this version
 			}
 			try {
 				woods.add(Material.MANGROVE_LOG);
-			} catch (NoSuchFieldError e) {
+			} catch (Exception | NoSuchFieldError e) {
 				// Material doesn't exist in this version
 			}
 			for (Material wood : woods) {
@@ -1503,27 +1502,27 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 						Material.FARMLAND);
 				try {
 					plantSurfaces.add(Material.PODZOL);
-				} catch (NoSuchFieldError e) {
+				} catch (Exception | NoSuchFieldError e) {
 					// Material doesn't exist in this version
 				}
 				try {
 					plantSurfaces.add(Material.MOSS_BLOCK);
-				} catch (NoSuchFieldError e) {
+				} catch (Exception | NoSuchFieldError e) {
 					// Material doesn't exist in this version
 				}
 				try {
 					plantSurfaces.add(Material.ROOTED_DIRT);
-				} catch (NoSuchFieldError e) {
+				} catch (Exception | NoSuchFieldError e) {
 					// Material doesn't exist in this version
 				}
 				try {
 					plantSurfaces.add(Material.COARSE_DIRT);
-				} catch (NoSuchFieldError e) {
+				} catch (Exception | NoSuchFieldError e) {
 					// Material doesn't exist in this version
 				}
 				try {
 					plantSurfaces.add(Material.MUD);
-				} catch (NoSuchFieldError e) {
+				} catch (Exception | NoSuchFieldError e) {
 					// Material doesn't exist in this version
 				}
 				treeMap.put(wood, new ArrayList<>(plantSurfaces));
