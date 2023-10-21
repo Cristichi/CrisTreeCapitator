@@ -371,10 +371,19 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			List<MetadataValue> fbbReplantMetas = firstBrokenB.getMetadata(META_INV_REPL);
 			for (MetadataValue replantMeta : fbbReplantMetas) {
 				if (replantMeta.asBoolean()) {
-					long actual = System.currentTimeMillis();
-					if (player.hasPermission("cristreecapitator.admin")) {
+					long currentTime = System.currentTimeMillis();
+					if (!isSappling(material)){
+						player.setMetadata("msged", new FixedMetadataValue(this, currentTime));
+						firstBrokenB.removeMetadata(META_INV_REPL, this);
+						firstBrokenB.getWorld()
+								.getBlockAt(firstBrokenB.getX(), firstBrokenB.getY() - 1, firstBrokenB.getZ())
+								.removeMetadata(META_INV_REPL, this);
+						firstBrokenB.getWorld()
+								.getBlockAt(firstBrokenB.getX(), firstBrokenB.getY() + 1, firstBrokenB.getZ())
+								.removeMetadata(META_INV_REPL, this);
+					} else if (player.hasPermission("cristreecapitator.admin")) {
 						player.sendMessage(header + "You broke a protected sapling.");
-						player.setMetadata("msged", new FixedMetadataValue(this, actual));
+						player.setMetadata("msged", new FixedMetadataValue(this, currentTime));
 						firstBrokenB.removeMetadata(META_INV_REPL, this);
 						firstBrokenB.getWorld()
 								.getBlockAt(firstBrokenB.getX(), firstBrokenB.getY() - 1, firstBrokenB.getZ())
@@ -384,9 +393,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 								.removeMetadata(META_INV_REPL, this);
 					} else {
 						List<MetadataValue> metasMsg = player.getMetadata("msged");
-						if (metasMsg.isEmpty() || actual - 5000 > metasMsg.get(0).asLong()) {
+						if (metasMsg.isEmpty() || currentTime - 5000 > metasMsg.get(0).asLong()) {
 							player.sendMessage(header + "This sapling is protected, please don't try to break it.");
-							player.setMetadata("msged", new FixedMetadataValue(this, actual));
+							player.setMetadata("msged", new FixedMetadataValue(this, currentTime));
 						}
 						event.setCancelled(true);
 					}
@@ -1443,6 +1452,11 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		if (!ret && admitNetherTrees)
 			return ret || mat.name().equals("NETHER_WART_BLOCK") || mat.name().equals("WARPED_WART_BLOCK")
 					|| mat.name().equals("SHROOMLIGHT");
+		return ret;
+	}
+
+	private boolean isSappling(Material mat) {
+		boolean ret = mat.name().contains("_SAPLING");
 		return ret;
 	}
 
