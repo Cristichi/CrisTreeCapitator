@@ -1511,6 +1511,11 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			} catch (Exception | NoSuchFieldError e) {
 				// Material doesn't exist in this version
 			}
+			try {
+				woods.add(Material.CHERRY_LOG);
+			} catch (Exception | NoSuchFieldError e) {
+				// Material doesn't exist in this version
+			}
 			for (Material wood : woods) {
 				List<Material> plantSurfaces = Arrays.asList(Material.DIRT, Material.GRASS_BLOCK, Material.MYCELIUM,
 						Material.FARMLAND);
