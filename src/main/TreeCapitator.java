@@ -41,6 +41,7 @@ import org.json.simple.parser.ParseException;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
+import lang.LocalizedString;
 import objs.Configuration;
 import objs.Updater;
 
@@ -116,15 +117,19 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	private String sneakingPrevention = "false";
 	private static final String DESC_SNEAKING_PREVENTION = "If true, crouching players won't trigger this plugin or only crouching players will. If \"inverted\", players will have to crouch to destroy trees instantly. False by default so updating from previous versions won't change this behaviour without notice.";
 
+	private static final String STRG_LANGUAGE = "language";
+	private String language = "english";
+	private static final String DESC_LANGUAGE = "Name of the language to use, as specified in the .json files inside"+LocalizedString.LANG_FOLDER+". To make your own language, copy default.json and edit it. Use the value you specify inside \"name\" here in order to select it.";
+
 	// TODO Extra logs/leaves
 	private JSONParser parser = new JSONParser();
 	private Material[] extraLogs = new Material[0], extraLeaves = new Material[0];
 
 	// Messages
-	private final String joinMensajeActivated = header + "Remember " + accentColor + "{player}" + textColor
-			+ ", you can use " + accentColor + "/tc toggle" + textColor + " to avoid breaking things made of logs.";
-	private final String joinMensajeDeactivated = header + "Remember " + accentColor + "{player}" + textColor
-			+ ", you can use " + accentColor + "/tc toggle" + textColor + " to cut down trees faster.";
+//	private final String joinMensajeActivated = header + "Remember " + accentColor + "{player}" + textColor
+//			+ ", you can use " + accentColor + "/tc toggle" + textColor + " to avoid breaking things made of logs.";
+//	private final String joinMensajeDeactivated = header + "Remember " + accentColor + "{player}" + textColor
+//			+ ", you can use " + accentColor + "/tc toggle" + textColor + " to cut down trees faster.";
 
 	// Metadata
 	private static final String PLAYER_ENABLE_META = "cristichi_treecap_meta_disable";
@@ -167,6 +172,14 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		saveConfiguration();
 
 		loadExtraJSONs();
+		
+		try {
+			LocalizedString.loadLangs();
+		} catch (Exception e) {
+			Bukkit.getLogger().log(Level.WARNING, "Languages could not be loaded. English will be loaded instead. Please check the following error:");
+			Bukkit.getLogger().log(Level.WARNING, e.toString());
+			Bukkit.getLogger().throwing("LocalizedString.java", "loadLangs()", e);
+		}
 
 		getLogger().info("Enabled");
 	}
@@ -215,6 +228,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				&& !sneakingPrevention.equals("false")) {
 			sneakingPrevention = defaultSP;
 		}
+		
+		language = config.getString(STRG_LANGUAGE, language);
+		config.setInfo(STRG_LANGUAGE, DESC_LANGUAGE);
 	}
 
 	private void loadExtraJSONs() {
@@ -232,7 +248,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 								+ "\" in extra_logs.json could not be recognized as any in-game Material.");
 					}
 				}
-				getLogger().log(Level.INFO, "Logs from JSON: " + Arrays.toString(extraLogs));
+				getLogger().log(Level.INFO, "Extra logs from JSON: " + Arrays.toString(extraLogs));
 			} catch (IOException e) {
 				getLogger().warning(
 						"extra_logs.json could not be read. Only the default logs (+ nether) will be detected.");
@@ -279,7 +295,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 								+ "\" in extra_leaves.json could not be recognized as any in-game Material.");
 					}
 				}
-				getLogger().log(Level.INFO, "Leaves from JSON: " + Arrays.toString(extraLeaves));
+				getLogger().log(Level.INFO, "Extra leaves from JSON: " + Arrays.toString(extraLeaves));
 			} catch (IOException e) {
 				getLogger().warning(
 						"extra_leaves.json could not be read. Only the default leaves (+ nether) will be detected.");
@@ -328,6 +344,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			config.setValue(STRG_JOIN_MSG, joinMsg);
 			config.setValue(STRG_IGNORE_LEAVES, ignoreLeaves);
 			config.setValue(STRG_SNEAKING_PREVENTION, sneakingPrevention);
+			config.setValue(STRG_LANGUAGE, language);
 			config.saveConfig();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -336,8 +353,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	@Override
 	public void onDisable() {
-		getLogger().info("Disabled");
 		saveConfig();
+		getLogger().info("Disabled");
 	}
 
 	@EventHandler
@@ -350,9 +367,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				enabled = meta.asBoolean();
 			}
 			if (enabled)
-				p.sendMessage(joinMensajeActivated.replace("{player}", p.getDisplayName()));
+				p.sendMessage(LocalizedString.JOIN_MSG_ENABLED.get(language).replace("{player}", p.getDisplayName()));
 			else
-				p.sendMessage(joinMensajeDeactivated.replace("{player}", p.getDisplayName()));
+				p.sendMessage(LocalizedString.JOIN_MSG_DISABLED.get(language).replace("{player}", p.getDisplayName()));
 		}
 	}
 
@@ -649,7 +666,9 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "/" + label + " setIgnoreLeaves <true/false>: " + textColor
 									+ DESC_IGNORE_LEAVES,
 							accentColor + "/" + label + " setCrouchPrevention <true/false>: " + textColor
-									+ DESC_SNEAKING_PREVENTION, });
+									+ DESC_SNEAKING_PREVENTION,
+							accentColor + "/" + label + " setLanguage <\"default\"/Custom>: " + textColor
+									+ DESC_LANGUAGE, });
 
 					break;
 
@@ -1199,6 +1218,41 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 					break;
 
+				case "setlanguage":
+				case "setlang":
+				case "lang":
+					if (sender.hasPermission("cristreecapitator.admin")) {
+						if (args.length != 2) {
+							sender.sendMessage(header + "Use: " + accentColor + "/" + label + " " + args[0]
+									+ " <true/false/yes/no/inv/inverted>" + textColor + ".");
+						} else {
+							switch (args[1]) {
+							case "default":
+							case "en":
+								language = "english";
+								break;
+
+							default:
+								language = args[1].trim().toLowerCase();
+								break;
+							}
+							config.setValue(STRG_LANGUAGE, language);
+							try {
+								config.saveConfig();
+								sender.sendMessage(header + "Language set to " + accentColor + "\"" + language + textColor + "\".");
+								sender.sendMessage(header + "Language set to " + accentColor + "\"" + language + textColor + "\".");
+							} catch (IOException e) {
+								sender.sendMessage(header + errorColor
+										+ "Error trying to save the value in the configuration file.");
+								e.printStackTrace();
+							}
+						}
+					} else {
+						sinPermiso = true;
+					}
+
+					break;
+
 				case "reload":
 					if (sender.hasPermission("cristreecapitator.admin")) {
 						loadConfiguration();
@@ -1292,6 +1346,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				list.add("setJoinMsg");
 				list.add("setIgnoreLeaves");
 				list.add("setCrouchPrevention");
+				list.add("setLanguage");
 			}
 			break;
 		case 1:
@@ -1343,6 +1398,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 						list.add("setCrouchPrevention");
 					if ("setsneakingprevention".contains(args[0]))
 						list.add("setSneakingPrevention");
+					if ("setlanguage".contains(args[0]))
+						list.add("setLanguage");
 				}
 				break;
 			}
@@ -1373,6 +1430,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				list.add("true");
 				list.add("inverted");
 				list.add("false");
+			case "setlanguage":
+			case "setlang":
+//				list.add("English");
+				
 			default:
 				break;
 			}
