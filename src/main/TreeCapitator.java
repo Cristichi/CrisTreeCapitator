@@ -119,17 +119,18 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 
 	private static final String STRG_LANGUAGE = "language";
 	private String language = "english";
-	private static final String DESC_LANGUAGE = "Name of the language to use, as specified in the .json files inside"+LocalizedString.LANG_FOLDER+". To make your own language, copy default.json and edit it. Use the value you specify inside \"name\" here in order to select it.";
+	private static final String DESC_LANGUAGE = "Name of the language to use, as specified in the .json files inside"
+			+ LocalizedString.LANG_FOLDER
+			+ ". To make your own language, copy default.json and edit it. Use the value you specify inside \"name\" here in order to select it.";
 
-	// TODO Extra logs/leaves
 	private JSONParser parser = new JSONParser();
 	private Material[] extraLogs = new Material[0], extraLeaves = new Material[0];
 
 	// Messages
-//	private final String joinMensajeActivated = header + "Remember " + accentColor + "{player}" + textColor
-//			+ ", you can use " + accentColor + "/tc toggle" + textColor + " to avoid breaking things made of logs.";
-//	private final String joinMensajeDeactivated = header + "Remember " + accentColor + "{player}" + textColor
-//			+ ", you can use " + accentColor + "/tc toggle" + textColor + " to cut down trees faster.";
+	// private final String joinMensajeActivated = header + "Remember " + accentColor + "{player}" + textColor
+	// + ", you can use " + accentColor + "/tc toggle" + textColor + " to avoid breaking things made of logs.";
+	// private final String joinMensajeDeactivated = header + "Remember " + accentColor + "{player}" + textColor
+	// + ", you can use " + accentColor + "/tc toggle" + textColor + " to cut down trees faster.";
 
 	// Metadata
 	private static final String PLAYER_ENABLE_META = "cristichi_treecap_meta_disable";
@@ -154,7 +155,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	public void onEnable() {
 		wg = (WorldGuardPlugin) getServer().getPluginManager().getPlugin("WorldGuard");
 		if (wg == null)
-			getLogger().info("WorldGuard not found. Maybe WorldGuard or this plugin are not up to date?");
+			getLogger().info("WorldGuard not found. If this is unexpected, maybe WorldGuard or " + getName()
+					+ " are not up to date.");
 		else
 			getLogger().info("WorldGuard found, extra protection enabled.");
 
@@ -172,13 +174,19 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 		saveConfiguration();
 
 		loadExtraJSONs();
-		
+
 		try {
 			LocalizedString.loadLangs();
+
+			LocalizedString.addVariable("{textColor}", textColor.toString());
+			LocalizedString.addVariable("{accentColor}", accentColor.toString());
+			LocalizedString.addVariable("{pluginName}", getName());
+			LocalizedString.addVariable("{pluginVersion}", desc.getVersion());
 		} catch (Exception e) {
-			Bukkit.getLogger().log(Level.WARNING, "Languages could not be loaded. English will be loaded instead. Please check the following error:");
-			Bukkit.getLogger().log(Level.WARNING, e.toString());
 			Bukkit.getLogger().throwing("LocalizedString.java", "loadLangs()", e);
+			Bukkit.getLogger().log(Level.WARNING,
+					"Languages could not be loaded. English will be loaded instead. Please check your language .json files to identify the cause to the following error:");
+			Bukkit.getLogger().log(Level.WARNING, e.toString());
 		}
 
 		getLogger().info("Enabled");
@@ -228,7 +236,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				&& !sneakingPrevention.equals("false")) {
 			sneakingPrevention = defaultSP;
 		}
-		
+
 		language = config.getString(STRG_LANGUAGE, language);
 		config.setInfo(STRG_LANGUAGE, DESC_LANGUAGE);
 	}
@@ -274,8 +282,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				fw.write(jsonData.toJSONString());
 				fw.close();
 			} catch (IOException e) {
-				getLogger().warning(
-						"extra_logs.json could not be created. Only the default logs (+ nether) will be detected.");
+				getLogger().warning("extra_logs.json could not be created. The default log will be used.");
 				getLogger().throwing(this.getClass().getCanonicalName(), "onEnable", e);
 				extraLogs = new Material[0];
 			}
@@ -321,10 +328,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				fw.write(jsonData.toJSONString());
 				fw.close();
 			} catch (IOException e) {
-				getLogger().warning(
-						"extra_leaves.json could not be created. Only the default logs (+ nether) will be detected.");
+				getLogger().warning("extra_leaves.json could not be created. The default leaves will be used.");
 				getLogger().throwing(this.getClass().getCanonicalName(), "onEnable", e);
-				// Bukkit.getPluginManager().disablePlugin(this);
 				extraLeaves = new Material[0];
 			}
 		}
@@ -367,9 +372,11 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				enabled = meta.asBoolean();
 			}
 			if (enabled)
-				p.sendMessage(LocalizedString.JOIN_MSG_ENABLED.get(language).replace("{player}", p.getDisplayName()));
+				p.sendMessage(header
+						+ LocalizedString.JOIN_MSG_ENABLED.get(language).replace("{player}", p.getDisplayName()));
 			else
-				p.sendMessage(LocalizedString.JOIN_MSG_DISABLED.get(language).replace("{player}", p.getDisplayName()));
+				p.sendMessage(header
+						+ LocalizedString.JOIN_MSG_DISABLED.get(language).replace("{player}", p.getDisplayName()));
 		}
 	}
 
@@ -389,7 +396,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			for (MetadataValue replantMeta : fbbReplantMetas) {
 				if (replantMeta.asBoolean()) {
 					long currentTime = System.currentTimeMillis();
-					if (!isSappling(material)){
+					if (!isSappling(material)) {
 						player.setMetadata("msged", new FixedMetadataValue(this, currentTime));
 						firstBrokenB.removeMetadata(META_INV_REPL, this);
 						firstBrokenB.getWorld()
@@ -399,7 +406,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 								.getBlockAt(firstBrokenB.getX(), firstBrokenB.getY() + 1, firstBrokenB.getZ())
 								.removeMetadata(META_INV_REPL, this);
 					} else if (player.hasPermission("cristreecapitator.admin")) {
-						player.sendMessage(header + "You broke a protected sapling.");
+						player.sendMessage(header + LocalizedString.BROKE_PROTECTED_REPLANT.get(language));
 						player.setMetadata("msged", new FixedMetadataValue(this, currentTime));
 						firstBrokenB.removeMetadata(META_INV_REPL, this);
 						firstBrokenB.getWorld()
@@ -411,7 +418,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					} else {
 						List<MetadataValue> metasMsg = player.getMetadata("msged");
 						if (metasMsg.isEmpty() || currentTime - 5000 > metasMsg.get(0).asLong()) {
-							player.sendMessage(header + "This sapling is protected, please don't try to break it.");
+							player.sendMessage(header + LocalizedString.ATTEMPT_BREAK_PROTECTED_REPLANT.get(language));
 							player.setMetadata("msged", new FixedMetadataValue(this, currentTime));
 						}
 						event.setCancelled(true);
@@ -634,52 +641,62 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			}
 		}
 
-		boolean sinPermiso = false;
+		boolean noPermission = false;
 		if (bueno) {
 			if (args.length > 0) {
 				switch (args[0].toLowerCase()) {
 
+				// TODO
 				case "help":
-					sender.sendMessage(new String[] { header + "Commands:\n",
-							accentColor + "/" + label + " help: " + textColor + "Shows this help message.",
+					sender.sendMessage(new String[] { header + LocalizedString.HELP_CMD_COMMANDS.get(language) + "\n",
+							accentColor + "/" + label + " help: " + textColor
+									+ LocalizedString.HELP_CMD_HELP.get(language),
+							accentColor + "/" + label + " version: " + textColor
+									+ LocalizedString.HELP_CMD_VERSION.get(language),
 							accentColor + "/" + label + " update: " + textColor
-									+ "Updates the plugin if there is a new version. Only recomended if your server works on Minecraft 1.13 or superior.",
+									+ LocalizedString.HELP_CMD_UPDATE.get(language),
 							accentColor + "/" + label + " reload: " + textColor
-									+ "Looks for changes in the configuration file and applies them.",
+									+ LocalizedString.HELP_CMD_RELOAD.get(language),
 							accentColor + "/" + label + " toggle <true/false>: " + textColor
-									+ "Toggles the plugin to work or not on you.",
+									+ LocalizedString.HELP_CMD_TOGGLE.get(language),
 							accentColor + "/" + label + " settings: " + textColor
-									+ "Checks the values set in the configuration.",
-							accentColor + "/" + label + " setLimit <number>: " + textColor + DESC_MAX_BLOCKS,
-							accentColor + "/" + label + " setVipMode <true/false>: " + textColor + DESC_VIP_MODE,
-							accentColor + "/" + label + " setReplant <true/false>: " + textColor + DESC_REPLANT,
+									+ LocalizedString.HELP_CMD_SETTINGS.get(language),
+							accentColor + "/" + label + " setLimit <number>: " + textColor
+									+ LocalizedString.HELP_CMD_SET_LIMIT.get(language),
+							accentColor + "/" + label + " setVipMode <true/false>: " + textColor
+									+ LocalizedString.HELP_CMD_SET_VIP_MODE.get(language),
+							accentColor + "/" + label + " setReplant <true/false>: " + textColor
+									+ LocalizedString.HELP_CMD_SET_REPLANT.get(language),
 							accentColor + "/" + label + " setInvincibleReplanting <true/false>: " + textColor
-									+ DESC_INVINCIBLE_REPLANT,
-							accentColor + "/" + label + " setAxeNeeded <true/false>: " + textColor + DESC_AXE_NEEDED,
-							accentColor + "/" + label + " setDamageAxe <true/false>: " + textColor + DESC_DAMAGE_AXE,
-							accentColor + "/" + label + " setBreakAxes <true/false>: " + textColor + DESC_BREAK_AXE,
+									+ LocalizedString.HELP_CMD_SET_INV_REPL.get(language),
+							accentColor + "/" + label + " setAxeNeeded <true/false>: " + textColor
+									+ LocalizedString.HELP_CMD_SET_AXE_NEEDED.get(language),
+							accentColor + "/" + label + " setDamageAxe <true/false>: " + textColor
+									+ LocalizedString.HELP_CMD_SET_DMG_AXE.get(language),
+							accentColor + "/" + label + " setBreakAxes <true/false>: " + textColor
+									+ LocalizedString.HELP_CMD_SET_BREAK_AXE.get(language),
 							accentColor + "/" + label + " setNetherTrees <true/false>: " + textColor
-									+ DESC_ADMIT_NETHER_TREES,
+									+ LocalizedString.HELP_CMD_SET_NETHER_TREES.get(language),
 							accentColor + "/" + label + " setStartActivated <true/false>: " + textColor
-									+ DESC_START_ACTIVATED,
-							accentColor + "/" + label + " setJoinMsg <true/false>: " + textColor + DESC_JOIN_MSG,
+									+ LocalizedString.HELP_CMD_SET_START_ENABLED.get(language),
+							accentColor + "/" + label + " setJoinMsg <true/false>: " + textColor
+									+ LocalizedString.HELP_CMD_SET_SEND_JOIN_MSG.get(language),
 							accentColor + "/" + label + " setIgnoreLeaves <true/false>: " + textColor
-									+ DESC_IGNORE_LEAVES,
+									+ LocalizedString.HELP_CMD_SET_IGNORE_LEAVES.get(language),
 							accentColor + "/" + label + " setCrouchPrevention <true/false>: " + textColor
-									+ DESC_SNEAKING_PREVENTION,
-							accentColor + "/" + label + " setLanguage <\"default\"/Custom>: " + textColor
-									+ DESC_LANGUAGE, });
-
+									+ LocalizedString.HELP_CMD_SET_CROUCH_PREVENTION.get(language),
+							accentColor + "/" + label + " setLanguage <\"english\"/\"spanish\"/Custom>: " + textColor
+									+ LocalizedString.HELP_CMD_SET_LANG.get(language), });
 					break;
 
 				case "version":
-					sender.sendMessage(header + getName() + " v" + desc.getVersion());
+					sender.sendMessage(header + LocalizedString.VERSION_CMD.get(language));
 					break;
 
 				case "config":
 				case "values":
 				case "settings":
-					sender.sendMessage(new String[] { header + "Values:",
+					sender.sendMessage(new String[] { header + LocalizedString.SETTINGS_CMD.get(language) + ":",
 							accentColor + "Join Message: " + textColor + (joinMsg ? "show" : "not show"),
 							accentColor + "Starts Activated: " + textColor + (startActivated ? "yes" : "no"),
 							accentColor + "Limit: " + textColor + (maxBlocks < 0 ? "unbounded" : maxBlocks),
@@ -692,8 +709,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							accentColor + "Damage Axe: " + textColor + (damageAxe ? "yes" : "no"),
 							accentColor + "Break Axe: " + textColor + (breakAxe ? "yes" : "no"),
 							accentColor + "Ignore Leaves: " + textColor + (ignoreLeaves ? "yes" : "no"),
-							accentColor + "Crouch Prevention: " + textColor + (sneakingPrevention.equals("true") ? "yes"
-									: (sneakingPrevention.equals("false") ? "no" : "inverted")), });
+							accentColor + "Crouch Prevention: " + textColor
+									+ (sneakingPrevention.equals("true") ? "yes"
+											: (sneakingPrevention.equals("false") ? "no" : "inverted")),
+							accentColor + "Language: " + textColor + language.toLowerCase(), });
 					break;
 
 				case "toggle":
@@ -740,7 +759,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							}
 						}
 					} else {
-						sinPermiso = true;
+						noPermission = true;
 					}
 
 					break;
@@ -781,7 +800,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							}
 						}
 					} else {
-						sinPermiso = true;
+						noPermission = true;
 					}
 
 					break;
@@ -821,7 +840,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							}
 						}
 					} else {
-						sinPermiso = true;
+						noPermission = true;
 					}
 
 					break;
@@ -864,7 +883,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							}
 						}
 					} else {
-						sinPermiso = true;
+						noPermission = true;
 					}
 
 					break;
@@ -904,7 +923,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							}
 						}
 					} else {
-						sinPermiso = true;
+						noPermission = true;
 					}
 
 					break;
@@ -947,7 +966,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							}
 						}
 					} else {
-						sinPermiso = true;
+						noPermission = true;
 					}
 
 					break;
@@ -990,7 +1009,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							}
 						}
 					} else {
-						sinPermiso = true;
+						noPermission = true;
 					}
 
 					break;
@@ -1033,7 +1052,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							}
 						}
 					} else {
-						sinPermiso = true;
+						noPermission = true;
 					}
 
 					break;
@@ -1075,7 +1094,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							}
 						}
 					} else {
-						sinPermiso = true;
+						noPermission = true;
 					}
 
 					break;
@@ -1118,7 +1137,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							}
 						}
 					} else {
-						sinPermiso = true;
+						noPermission = true;
 					}
 
 					break;
@@ -1159,7 +1178,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							}
 						}
 					} else {
-						sinPermiso = true;
+						noPermission = true;
 					}
 
 					break;
@@ -1213,7 +1232,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							}
 						}
 					} else {
-						sinPermiso = true;
+						noPermission = true;
 					}
 
 					break;
@@ -1239,8 +1258,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							config.setValue(STRG_LANGUAGE, language);
 							try {
 								config.saveConfig();
-								sender.sendMessage(header + "Language set to " + accentColor + "\"" + language + textColor + "\".");
-								sender.sendMessage(header + "Language set to " + accentColor + "\"" + language + textColor + "\".");
+								sender.sendMessage(header + "Language set to " + accentColor + "\"" + language
+										+ textColor + "\".");
+								sender.sendMessage(header + "Language set to " + accentColor + "\"" + language
+										+ textColor + "\".");
 							} catch (IOException e) {
 								sender.sendMessage(header + errorColor
 										+ "Error trying to save the value in the configuration file.");
@@ -1248,7 +1269,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							}
 						}
 					} else {
-						sinPermiso = true;
+						noPermission = true;
 					}
 
 					break;
@@ -1259,7 +1280,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 						loadExtraJSONs();
 						sender.sendMessage(header + "Configuration loaded from file.");
 					} else {
-						sinPermiso = true;
+						noPermission = true;
 					}
 
 					break;
@@ -1282,25 +1303,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 							sender.sendMessage(header + "This plugin is already up to date.");
 						}
 					} else {
-						sinPermiso = true;
-					}
-
-					break;
-
-				case "forceupdate115935":
-					if (sender.hasPermission("cristreecapitator.admin")) {
-						try {
-							updater = new Updater(this, ID, this.getFile(), Updater.UpdateType.DEFAULT, true);
-							updater.getResult();
-							sender.sendMessage(
-									header + "Use " + accentColor + "/reload" + textColor + " to apply changes.");
-						} catch (ParseException e) {
-							sender.sendMessage(header + errorColor
-									+ "An internal error ocurred while trying to update: " + e.getMessage());
-							e.printStackTrace();
-						}
-					} else {
-						sinPermiso = true;
+						noPermission = true;
 					}
 
 					break;
@@ -1315,7 +1318,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			}
 		}
 
-		if (sinPermiso) {
+		if (noPermission) {
 			sender.sendMessage(header + errorColor + "You don't have permission to use this command.");
 		}
 		return bueno;
@@ -1432,8 +1435,8 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				list.add("false");
 			case "setlanguage":
 			case "setlang":
-//				list.add("English");
-				
+				// list.add("English");
+
 			default:
 				break;
 			}
@@ -1447,10 +1450,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	/**
 	 * Deals 1 damage to an item, if possible
 	 * 
-	 * @param player
-	 * @param tool
-	 * @return true if item is destroyed or should not be damaged anymore, false if
-	 *         not damageable or damaged but not destroyed
+	 * @param  player
+	 * @param  tool
+	 * @return        true if item is destroyed or should not be damaged anymore, false if
+	 *                not damageable or damaged but not destroyed
 	 */
 	private boolean damageItem(Player player, ItemStack tool, Material material) {
 		if (axeNeeded && damageAxe && tool != null && isLog(material)) {
