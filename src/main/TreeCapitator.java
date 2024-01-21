@@ -155,10 +155,10 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	public void onEnable() {
 		wg = (WorldGuardPlugin) getServer().getPluginManager().getPlugin("WorldGuard");
 		if (wg == null)
-			getLogger().info("WorldGuard not found. If this is unexpected, maybe WorldGuard or " + getName()
+			getLogger().info("[CrisTreeCapitator] WorldGuard not found. If this is unexpected, maybe WorldGuard or " + getName()
 					+ " are not up to date.");
 		else
-			getLogger().info("WorldGuard found, extra protection enabled.");
+			getLogger().info("[CrisTreeCapitator] WorldGuard found, extra protection enabled.");
 
 		getServer().getPluginManager().registerEvents(this, this);
 
@@ -183,13 +183,11 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 			LocalizedString.addVariable("{pluginName}", getName());
 			LocalizedString.addVariable("{pluginVersion}", desc.getVersion());
 		} catch (Exception e) {
-			Bukkit.getLogger().throwing("LocalizedString.java", "loadLangs()", e);
 			Bukkit.getLogger().log(Level.WARNING,
-					"Languages could not be loaded. English will be loaded instead. Please check your language .json files to identify the cause to the following error:");
-			Bukkit.getLogger().log(Level.WARNING, e.toString());
+					"[CrisTreeCapitator] Languages could not be loaded. English will be loaded instead. Please check your language .json files to identify the cause to the following error:\n"+e.toString());
 		}
 
-		getLogger().info("Enabled");
+		getLogger().info("[CrisTreeCapitator] Enabled");
 	}
 
 	private void loadConfiguration() {
@@ -252,20 +250,18 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				for (int i = 0; i < strExtraLogs.length; i++) {
 					extraLogs[i] = Material.getMaterial(strExtraLogs[i].toString());
 					if (extraLogs[i] == null) {
-						getLogger().warning("Material \"" + strExtraLogs[i]
+						getLogger().warning("[CrisTreeCapitator] Material \"" + strExtraLogs[i]
 								+ "\" in extra_logs.json could not be recognized as any in-game Material.");
 					}
 				}
-				getLogger().log(Level.INFO, "Extra logs from JSON: " + Arrays.toString(extraLogs));
+				getLogger().log(Level.INFO, "[CrisTreeCapitator] Extra logs from JSON: " + Arrays.toString(extraLogs));
 			} catch (IOException e) {
 				getLogger().warning(
-						"extra_logs.json could not be read. Only the default logs (+ nether) will be detected.");
-				getLogger().throwing(this.getClass().getCanonicalName(), "onEnable", e);
+						"[CrisTreeCapitator] extra_logs.json could not be read. Only the default logs (+ nether) will be detected.");
 				extraLogs = new Material[0];
 			} catch (ParseException e) {
 				getLogger().warning(
-						"extra_logs.json is an invalid JSON. Please make sure the contents of the file are a valid JSON format. Only the default logs (+ nether) will be detected.");
-				getLogger().throwing(this.getClass().getCanonicalName(), "onEnable", e);
+						"[CrisTreeCapitator] extra_logs.json is an invalid JSON. Please make sure the contents of the file are a valid JSON format. Only the default logs (+ nether) will be detected.");
 				extraLogs = new Material[0];
 			}
 		} else {
@@ -274,16 +270,12 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				JSONObject jsonData = new JSONObject();
 				JSONArray jsonArrayLogs = new JSONArray();
 				jsonArrayLogs.add("OAK_LOG");
-				jsonArrayLogs.add("OAK_LOG");
-				jsonArrayLogs.add("OAK_LOG");
-				jsonArrayLogs.add("OAK_LOG");
 				jsonData.put("logs", jsonArrayLogs);
 				FileWriter fw = new FileWriter(fExtraLogs);
 				fw.write(jsonData.toJSONString());
 				fw.close();
 			} catch (IOException e) {
-				getLogger().warning("extra_logs.json could not be created. The default log will be used.");
-				getLogger().throwing(this.getClass().getCanonicalName(), "onEnable", e);
+				getLogger().warning("[CrisTreeCapitator] extra_logs.json could not be created. The default log will be used.");
 				extraLogs = new Material[0];
 			}
 		}
@@ -298,20 +290,18 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				for (int i = 0; i < strExtraLeaves.length; i++) {
 					extraLeaves[i] = Material.getMaterial(strExtraLeaves[i].toString());
 					if (extraLeaves[i] == null) {
-						getLogger().warning("Material \"" + strExtraLeaves[i]
+						getLogger().warning("[CrisTreeCapitator] Material \"" + strExtraLeaves[i]
 								+ "\" in extra_leaves.json could not be recognized as any in-game Material.");
 					}
 				}
-				getLogger().log(Level.INFO, "Extra leaves from JSON: " + Arrays.toString(extraLeaves));
+				getLogger().log(Level.INFO, "[CrisTreeCapitator] Extra leaves from JSON: " + Arrays.toString(extraLeaves));
 			} catch (IOException e) {
 				getLogger().warning(
-						"extra_leaves.json could not be read. Only the default leaves (+ nether) will be detected.");
-				getLogger().throwing(this.getClass().getCanonicalName(), "onEnable", e);
+						"[CrisTreeCapitator] extra_leaves.json could not be read. Only the default leaves (+ nether) will be detected.");
 				extraLeaves = new Material[0];
 			} catch (ParseException e) {
 				getLogger().warning(
-						"extra_leaves.json is an invalid JSON. Please make sure the contents of the file are a valid JSON format. Only the default leaves (+ nether) will be detected.");
-				getLogger().throwing(this.getClass().getCanonicalName(), "onEnable", e);
+						"[CrisTreeCapitator] extra_leaves.json is an invalid JSON. Please make sure the contents of the file are a valid JSON format. Only the default leaves (+ nether) will be detected.");
 				extraLeaves = new Material[0];
 			}
 		} else {
@@ -320,16 +310,12 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 				JSONObject jsonData = new JSONObject();
 				JSONArray jsonArrayLeaves = new JSONArray();
 				jsonArrayLeaves.add("OAK_LEAVES");
-				jsonArrayLeaves.add("OAK_LEAVES");
-				jsonArrayLeaves.add("OAK_LEAVES");
-				jsonArrayLeaves.add("OAK_LEAVES");
 				jsonData.put("leaves", jsonArrayLeaves);
 				FileWriter fw = new FileWriter(fExtraLeaves);
 				fw.write(jsonData.toJSONString());
 				fw.close();
 			} catch (IOException e) {
-				getLogger().warning("extra_leaves.json could not be created. The default leaves will be used.");
-				getLogger().throwing(this.getClass().getCanonicalName(), "onEnable", e);
+				getLogger().warning("[CrisTreeCapitator] extra_leaves.json could not be created. The default leaves will be used.");
 				extraLeaves = new Material[0];
 			}
 		}
@@ -359,7 +345,7 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 	@Override
 	public void onDisable() {
 		saveConfig();
-		getLogger().info("Disabled");
+		getLogger().info("[CrisTreeCapitator] Disabled");
 	}
 
 	@EventHandler
@@ -471,7 +457,6 @@ public class TreeCapitator extends JavaPlugin implements Listener {
 					event.setCancelled(true);
 				}
 			} catch (StackOverflowError e) {
-				Bukkit.getLogger().throwing("TreeCapitator.java", "onBlockBreak(Event)", e);
 			}
 		}
 

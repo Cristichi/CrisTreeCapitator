@@ -1,6 +1,6 @@
 name: CrisTreeCapitator
 main: main.TreeCapitator
-version: B6.5.03
+version: B6.5.04
 api-version: 1.13
 softdepend: [WorldGuard]
 commands:

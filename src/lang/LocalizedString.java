@@ -7,9 +7,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.logging.Level;
 
 import javax.annotation.Nullable;
 
+import org.bukkit.Bukkit;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -88,15 +91,12 @@ public enum LocalizedString {
 			content.put("name", "English");
 			LinkedHashMap<String, String> mapMsgs = new LinkedHashMap<>();
 			for (LocalizedString locStr : LocalizedString.values()) {
-				System.out.println("          "+locStr.id+": "+locStr.getRaw("english"));
 				mapMsgs.put(locStr.id, locStr.getRaw("english"));
 			}
-//			mapMsgs.put(JOIN_MSG_ENABLED.id, JOIN_MSG_ENABLED.getRaw("english"));
-//			mapMsgs.put(JOIN_MSG_DISABLED.id, JOIN_MSG_DISABLED.getRaw("english"));
 			content.put("messages", mapMsgs);
 			
 			Gson gson = new GsonBuilder().setPrettyPrinting().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY).create();
-			System.out.println(gson.toJson(content));
+//			System.out.println(gson.toJson(content));
 			FileWriter fw = new FileWriter(langDefault);
 			fw.write(gson.toJson(content));
 			fw.close();
@@ -113,9 +113,23 @@ public enum LocalizedString {
 			JSONObject jsonObj = (JSONObject) parser.parse(new FileReader(file));
 			String language = ((String) jsonObj.get("name")).toLowerCase();
 			JSONObject msgsJSONObj = (JSONObject) jsonObj.get("messages");
-
-			JOIN_MSG_ENABLED.put(language, msgsJSONObj.get(JOIN_MSG_ENABLED.getId()).toString());
-			JOIN_MSG_DISABLED.put(language, msgsJSONObj.get(JOIN_MSG_ENABLED.getId()).toString());
+			
+			LinkedList<String> missingEntries = new LinkedList<>();
+			for (LocalizedString locStr : LocalizedString.values()) {
+				Object msg = msgsJSONObj.get(locStr.getId());
+				if (msg != null) {
+					locStr.put(language, msgsJSONObj.get(locStr.getId()).toString());	
+				} else {
+					missingEntries.add(locStr.getId());
+				}
+			}
+			
+			String missingEntriesLog = "[CrisTreeCapitator] The language \""+language+"\" specified in \""+file.getName()+"\" is incomplete. It lacks the following entries:";
+			for (String string : missingEntries) {
+				missingEntriesLog += "\n  -"+string;
+			}
+			Bukkit.getLogger().log(Level.WARNING, missingEntriesLog);
+			Bukkit.getLogger().log(Level.WARNING, "[CrisTreeCapitator] Please check default.json for the usage of those entries and add them to \""+file.getName()+"\". Until then, those entries will use the English version.");
 		}
 	}
 
