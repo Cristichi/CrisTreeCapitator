@@ -19,12 +19,13 @@ import java.util.zip.ZipFile;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
+
+import main.TreeCapitator;
 
 /**
  * Check for updates on BukkitDev for a given plugin, and download the updates if needed.
@@ -79,7 +80,7 @@ public class Updater {
     /* User-provided variables */
 
     // Plugin running Updater
-    private final Plugin plugin;
+    private final TreeCapitator plugin;
     // Type of update check to run
     private final UpdateType type;
     // Whether to announce file downloads
@@ -199,7 +200,7 @@ public class Updater {
      * @param announce True if the program should announce the progress of new updates in console.
      * @throws ParseException 
      */
-    public Updater(Plugin plugin, int id, File file, UpdateType type, boolean announce) throws ParseException {
+    public Updater(TreeCapitator plugin, int id, File file, UpdateType type, boolean announce) throws ParseException {
         this(plugin, id, file, type, null, announce);
     }
 
@@ -213,7 +214,7 @@ public class Updater {
      * @param callback The callback instance to notify when the Updater has finished
      * @throws ParseException 
      */
-    public Updater(Plugin plugin, int id, File file, UpdateType type, UpdateCallback callback) throws ParseException {
+    public Updater(TreeCapitator plugin, int id, File file, UpdateType type, UpdateCallback callback) throws ParseException {
         this(plugin, id, file, type, callback, false);
     }
 
@@ -229,7 +230,7 @@ public class Updater {
      * @throws ParseException 
      */
     @SuppressWarnings("deprecation")
-	public Updater(Plugin plugin, int id, File file, UpdateType type, UpdateCallback callback, boolean announce) throws ParseException {
+	public Updater(TreeCapitator plugin, int id, File file, UpdateType type, UpdateCallback callback, boolean announce) throws ParseException {
         this.plugin = plugin;
         this.type = type;
         this.announce = announce;
@@ -271,9 +272,9 @@ public class Updater {
         } catch (final Exception e) {
             final String message;
             if (createFile) {
-                message = "[CrisTreeCapitator] The updater could not create configuration at " + updaterFile.getAbsolutePath();
+                message = plugin.header+"The updater could not create configuration at " + updaterFile.getAbsolutePath();
             } else {
-                message = "[CrisTreeCapitator] The updater could not load configuration at " + updaterFile.getAbsolutePath();
+                message = plugin.header+"The updater could not load configuration at " + updaterFile.getAbsolutePath();
             }
             this.plugin.getLogger().log(Level.SEVERE, message, e);
         }
@@ -293,7 +294,7 @@ public class Updater {
         try {
             this.url = new URL(Updater.HOST + Updater.QUERY + this.id);
         } catch (final MalformedURLException e) {
-            this.plugin.getLogger().log(Level.SEVERE, "[CrisTreeCapitator] The project ID provided for updating, " + this.id + " is invalid.", e);
+            this.plugin.getLogger().log(Level.SEVERE, plugin.header+"The project ID provided for updating, " + this.id + " is invalid.", e);
             this.result = UpdateResult.FAIL_BADID;
         }
 
@@ -399,7 +400,7 @@ public class Updater {
             this.unzip(dFile.getAbsolutePath());
         }
         if (this.announce) {
-            this.plugin.getLogger().info("[CrisTreeCapitator] Finished updating.");
+            this.plugin.getLogger().info(plugin.header+"Finished updating.");
         }
     }
 
@@ -418,7 +419,7 @@ public class Updater {
             final byte[] data = new byte[Updater.BYTE_SIZE];
             int count;
             if (this.announce) {
-                this.plugin.getLogger().info("[CrisTreeCapitator] About to download a new update: " + this.versionName);
+                this.plugin.getLogger().info(plugin.header+"About to download a new update: " + this.versionName);
             }
             long downloaded = 0;
             while ((count = in.read(data, 0, Updater.BYTE_SIZE)) != -1) {
@@ -426,11 +427,11 @@ public class Updater {
                 fout.write(data, 0, count);
                 final int percent = (int) ((downloaded * 100) / fileLength);
                 if (this.announce && ((percent % 10) == 0)) {
-                    this.plugin.getLogger().info("[CrisTreeCapitator] Downloading update: " + percent + "% of " + fileLength + " bytes.");
+                    this.plugin.getLogger().info(plugin.header+"Downloading update: " + percent + "% of " + fileLength + " bytes.");
                 }
             }
         } catch (Exception ex) {
-            this.plugin.getLogger().log(Level.WARNING, "[CrisTreeCapitator] The auto-updater tried to download a new update, but was unsuccessful.", ex);
+            this.plugin.getLogger().log(Level.WARNING, plugin.header+"The auto-updater tried to download a new update, but was unsuccessful.", ex);
             this.result = Updater.UpdateResult.FAIL_DOWNLOAD;
         } finally {
             try {
@@ -530,7 +531,7 @@ public class Updater {
             moveNewZipFiles(zipPath);
 
         } catch (final IOException e) {
-            this.plugin.getLogger().log(Level.SEVERE, "[CrisTreeCapitator] The auto-updater tried to unzip a new update file, but was unsuccessful.", e);
+            this.plugin.getLogger().log(Level.SEVERE, plugin.header+"The auto-updater tried to unzip a new update file, but was unsuccessful.", e);
             this.result = Updater.UpdateResult.FAIL_DOWNLOAD;
         } finally {
             this.fileIOOrError(fSourceZip, fSourceZip.delete(), false);
@@ -615,9 +616,9 @@ public class Updater {
             } else {
                 // The file's name did not contain the string 'vVersion'
                 final String authorInfo = this.plugin.getDescription().getAuthors().isEmpty() ? "" : " (" + this.plugin.getDescription().getAuthors().get(0) + ")";
-                this.plugin.getLogger().warning("[CrisTreeCapitator] Cristichi, the author of this plugin" + authorInfo + " has misconfigured their Auto Update system");
-                this.plugin.getLogger().warning("[CrisTreeCapitator] File versions should follow the format 'PluginName vVERSION'");
-                this.plugin.getLogger().warning("[CrisTreeCapitator] Please notify the author of this error.");
+                this.plugin.getLogger().warning(plugin.header+"Cristichi, the author of this plugin" + authorInfo + " has misconfigured their Auto Update system");
+                this.plugin.getLogger().warning(plugin.header+"File versions should follow the format 'PluginName vVERSION'");
+                this.plugin.getLogger().warning(plugin.header+"Please notify the author of this error.");
                 this.result = Updater.UpdateResult.FAIL_NOVERSION;
                 return false;
             }
@@ -709,7 +710,7 @@ public class Updater {
             final JSONArray array = (JSONArray) JSONValue.parseWithException(response);
 
             if (array.isEmpty()) {
-                this.plugin.getLogger().warning("[CrisTreeCapitator] The updater could not find any files for the project id " + this.id);
+                this.plugin.getLogger().warning(plugin.header+"The updater could not find any files for the project id " + this.id);
                 this.result = UpdateResult.FAIL_BADID;
                 return false;
             }
@@ -723,12 +724,12 @@ public class Updater {
             return true;
         } catch (final IOException e) {
             if (e.getMessage().contains("HTTP response code: 403")) {
-                this.plugin.getLogger().severe("[CrisTreeCapitator] dev.bukkit.org rejected the API key provided in plugins/Updater/config.yml");
-                this.plugin.getLogger().severe("[CrisTreeCapitator] Please double-check your configuration to ensure it is correct.");
+                this.plugin.getLogger().severe(plugin.header+"dev.bukkit.org rejected the API key provided in plugins/Updater/config.yml");
+                this.plugin.getLogger().severe(plugin.header+"Please double-check your configuration to ensure it is correct.");
                 this.result = UpdateResult.FAIL_APIKEY;
             } else {
-                this.plugin.getLogger().severe("[CrisTreeCapitator] The updater could not contact dev.bukkit.org for updating.");
-                this.plugin.getLogger().severe("[CrisTreeCapitator] If you have not recently modified your configuration and this is the first time you are seeing this message, the site may be experiencing temporary downtime.");
+                this.plugin.getLogger().severe(plugin.header+"The updater could not contact dev.bukkit.org for updating.");
+                this.plugin.getLogger().severe(plugin.header+"If you have not recently modified your configuration and this is the first time you are seeing this message, the site may be experiencing temporary downtime.");
                 this.result = UpdateResult.FAIL_DBO;
             }
             this.plugin.getLogger().log(Level.SEVERE, null, e);
@@ -744,14 +745,14 @@ public class Updater {
      */
     private void fileIOOrError(File file, boolean result, boolean create) {
         if (!result) {
-            this.plugin.getLogger().severe("[CrisTreeCapitator] The updater could not " + (create ? "create" : "delete") + " file at: " + file.getAbsolutePath());
+            this.plugin.getLogger().severe(plugin.header+"The updater could not " + (create ? "create" : "delete") + " file at: " + file.getAbsolutePath());
         }
     }
 
     private File[] listFilesOrError(File folder) {
         File[] contents = folder.listFiles();
         if (contents == null) {
-            this.plugin.getLogger().severe("[CrisTreeCapitator] The updater could not access files at: " + this.updateFolder.getAbsolutePath());
+            this.plugin.getLogger().severe(plugin.header+"The updater could not access files at: " + this.updateFolder.getAbsolutePath());
             return new File[0];
         } else {
             return contents;
@@ -776,7 +777,7 @@ public class Updater {
             try {
 				runUpdater();
 			} catch (ParseException e) {
-				Bukkit.getLogger().log(Level.WARNING, "[CrisTreeCapitator] Updater could not update Cristichi's Tree Capitator.");
+				Bukkit.getLogger().log(Level.WARNING, plugin.header+"Updater could not update Cristichi's Tree Capitator.");
 				e.printStackTrace();
 			}
         }
