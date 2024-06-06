@@ -1,30 +1,11 @@
 package lang;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.logging.Level;
 
 import javax.annotation.Nullable;
 
-import org.bukkit.Bukkit;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import main.TreeCapitator;
-
 public enum LocalizedString {
-	// TODO: El resto de mensajes (son un montón)
+	// TODO: Add all other messages (they are a lot)
 	HELP_CMD_COMMANDS("help_cmd_commands", "Commands:"), HELP_CMD_HELP("help_cmd_help", "Shows this help message."),
 	HELP_CMD_VERSION("help_cmd_version", "Shows the current version of this plugin you are running."),
 	HELP_CMD_UPDATE("help_cmd_update",
@@ -68,90 +49,6 @@ public enum LocalizedString {
 			"This sapling is protected, please don't try to break it."),
 	BROKE_PROTECTED_REPLANT("broken_protected_sapling", "You broke a protected sapling.");
 
-	public static String LANG_FOLDER = "plugins/CrisTreeCapitator/lang";
-	private static HashMap<String, String> variables = new HashMap<>(2);
-
-	public static void addVariable(String variable, String replacement) {
-		variables.put(variable, replacement);
-	}
-
-	/*
-	 * Example files:
-	 * default.json
-	 * {
-	 * name: "English",
-	 * messages: {
-	 * "join_msg_enabled": "Remember, you can use {accentColor}/tc toggle{textColor} to toggle this plugin off!",
-	 * "join_msg_disabled": "Remember, you can use {accentColor}/tc toggle{textColor} to toggle this plugin on!"
-	 * }
-	 * }
-	 * custom_lang.json
-	 * {
-	 * name: "Castellano",
-	 * messages: {
-	 * "join_msg_enabled": "Recuerda, puedes usar {accentColor}/tc toggle{textColor} para desactivar la talla de árboles automática.",
-	 * "join_msg_disabled": "Recuerda, puedes usar {accentColor}/tc toggle{textColor} para activar la talla de árboles automática."
-	 * }
-	 * }
-	 */
-	public static void loadLangs(TreeCapitator plugin) throws IOException, ParseException {
-		File langFolder = new File(LANG_FOLDER);
-		if (!langFolder.exists()) {
-			langFolder.mkdir();
-		}
-		{
-			File langDefault = new File(langFolder, "default.json");
-			langDefault.delete();
-			langDefault.createNewFile();
-			JSONObject content = new JSONObject();
-			content.put("name", "English");
-			LinkedHashMap<String, String> mapMsgs = new LinkedHashMap<>();
-			for (LocalizedString locStr : LocalizedString.values()) {
-				mapMsgs.put(locStr.id, locStr.getRaw("english"));
-			}
-			content.put("messages", mapMsgs);
-
-			Gson gson = new GsonBuilder().setPrettyPrinting().setFieldNamingPolicy(FieldNamingPolicy.IDENTITY).create();
-			// System.out.println(gson.toJson(content));
-			FileWriter fw = new FileWriter(langDefault);
-			fw.write(gson.toJson(content));
-			fw.close();
-		}
-
-		for (File file : langFolder.listFiles(new FileFilter() {
-
-			@Override
-			public boolean accept(File pathname) {
-				return pathname.getName().endsWith(".json") && !pathname.getName().equals("default.json");
-			}
-		})) {
-			JSONParser parser = new JSONParser();
-			JSONObject jsonObj = (JSONObject) parser.parse(new FileReader(file));
-			String language = ((String) jsonObj.get("name")).toLowerCase();
-			JSONObject msgsJSONObj = (JSONObject) jsonObj.get("messages");
-
-			LinkedList<String> missingEntries = new LinkedList<>();
-			for (LocalizedString locStr : LocalizedString.values()) {
-				Object msg = msgsJSONObj.get(locStr.getId());
-				if (msg != null) {
-					locStr.put(language, msgsJSONObj.get(locStr.getId()).toString());
-				} else {
-					missingEntries.add(locStr.getId());
-				}
-			}
-
-			String missingEntriesLog = plugin.header + "The language \"" + language + "\" specified in \""
-					+ file.getName() + "\" is incomplete. It lacks the following entries:";
-			for (String string : missingEntries) {
-				missingEntriesLog += "\n  -" + string;
-			}
-			Bukkit.getLogger().log(Level.WARNING, missingEntriesLog);
-			Bukkit.getLogger().log(Level.WARNING,
-					plugin.header + "Please check your default.json for the usage of those entries and add them to \""
-							+ file.getName() + "\". Until then, those entries will use the English version.");
-		}
-	}
-
 	private HashMap<String, String> loadedTranslations;
 
 	private String id;
@@ -166,23 +63,30 @@ public enum LocalizedString {
 		return id;
 	}
 
-	private void put(String lang, String message) {
+	void put(String lang, String message) {
 		loadedTranslations.put(lang.toLowerCase(), message);
 	}
 
-	private String getRaw(String language) {
+	/**
+	 * @param  language
+	 * @return          Message without replacing the variables.
+	 */
+	String getRaw(@Nullable String language) {
 		String loc = loadedTranslations.get(language.toLowerCase());
 		return loc == null ? loadedTranslations.get("english") : loc;
 	}
 
-	@Nullable
-	public String get(String language) {
-		String loc = loadedTranslations.get(language.toLowerCase());
+	/**
+	 * @param  language
+	 * @return          Localized String replacing all replaceable variables.
+	 */
+	public String get(@Nullable String language) {
+		String loc = loadedTranslations.get(language == null ? "english" : language.toLowerCase());
 		if (loc == null) {
 			loc = loadedTranslations.get("english");
 		}
-		for (String replaced : variables.keySet()) {
-			loc = loc.replace(replaced, variables.get(replaced));
+		for (String replaced : Localization.variables.keySet()) {
+			loc = loc.replace(replaced, Localization.variables.get(replaced));
 		}
 		return loc;
 	}
