@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.bukkit.Bukkit;
+
 import exc.ConfigValueNotFound;
 import exc.ConfigValueNotParsed;
 
@@ -204,7 +206,7 @@ public class Configuration extends File implements Cloneable {
 			}
 			reader.close();
 		} catch (FileNotFoundException e) {
-			System.err.println("Configuration file not created yet. Skipping load.");
+			Bukkit.getLogger().info("Configuration file not created yet. Skipping load.");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
